@@ -109,6 +109,30 @@ final class Catalogue
     }
 
     /**
+     * Products whose title or description contains the term, ignoring case, in
+     * source order. The term is matched literally and surrounding spaces are
+     * ignored. A blank term finds nothing, so a visitor is never shown the
+     * whole catalogue as if it were a result.
+     *
+     * @return list<Product>
+     */
+    public function search(string $term): array
+    {
+        $term = trim($term);
+        if ($term === '') {
+            return [];
+        }
+
+        $matches = array_filter(
+            $this->source->all(),
+            fn (Product $product) => mb_stripos($product->title, $term) !== false
+                || mb_stripos($product->description, $term) !== false,
+        );
+
+        return array_map($this->present(...), array_values($matches));
+    }
+
+    /**
      * How a product is shown to a visitor. Featured is the only highlight, so a
      * featured product carries no rating wherever it appears. Every method that
      * returns products to show goes through here, so the rule lives once.

@@ -4,12 +4,12 @@
 
 **Blocked by:** 02: Home page shows the featured products.
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] The search bar and button are available on every page
-- [ ] Results include a product when the term appears in its title
-- [ ] Results include a product when the term appears only in its description
-- [ ] Matching ignores case
-- [ ] A blank term shows a prompt and no products
-- [ ] A term with no matches shows a nothing-found message
-- [ ] Backend request-level tests cover title match, description match, case, blank term and no match
+- [x] The search bar and button are available on every page
+- [x] Results include a product when the term appears in its title
+- [x] Results include a product when the term appears only in its description
+- [x] Matching ignores case
+- [x] A blank term shows a prompt and no products
+- [x] A term with no matches shows a nothing-found message
+- [x] Backend request-level tests cover title match, description match, case, blank term and no match

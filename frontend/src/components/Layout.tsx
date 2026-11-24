@@ -3,6 +3,7 @@ import { getCategories } from '../api/client'
 import type { Load } from '../useLoad'
 import { useLoad } from '../useLoad'
 import CategoryLinks from './CategoryLinks'
+import SearchBar from './SearchBar'
 
 export type LayoutContext = {
   categories: Load<string[]>
@@ -25,6 +26,7 @@ export default function Layout() {
             <CategoryLinks categories={categories.data} />
           </nav>
         )}
+        <SearchBar />
       </header>
       <main>
         <Outlet context={context} />

@@ -70,6 +70,9 @@ export const getCategories = () => getData<string[]>('/api/categories')
 export const getCategoryProducts = (category: string) =>
   getData<Product[]>(`/api/categories/${encodeURIComponent(category)}/products`)
 
+export const searchProducts = (term: string) =>
+  getData<Product[]>(`/api/search?q=${encodeURIComponent(term)}`)
+
 export const getProduct = (id: string) => getData<Product>(`/api/products/${encodeURIComponent(id)}`)
 
 export async function sendEnquiry(productId: number, input: EnquiryInput): Promise<void> {

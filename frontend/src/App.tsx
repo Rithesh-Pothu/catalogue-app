@@ -4,6 +4,7 @@ import CategoryPage from './pages/CategoryPage'
 import HomePage from './pages/HomePage'
 import NotFoundPage from './pages/NotFoundPage'
 import ProductPage from './pages/ProductPage'
+import SearchPage from './pages/SearchPage'
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
         <Route index element={<HomePage />} />
         <Route path="products/:id" element={<ProductPage />} />
         <Route path="category/:name" element={<CategoryPage />} />
+        <Route path="search" element={<SearchPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>
