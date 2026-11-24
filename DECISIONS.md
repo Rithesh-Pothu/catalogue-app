@@ -1,3 +1,62 @@
 # Decisions and assumptions
 
-Record assumptions, trade-offs, simplified requirements, extensibility and next steps here.
+Architecture decisions are in `docs/adr/`. Domain terms are in `GLOSSARY.md`.
+
+## Assumptions
+
+- Featured products are a fixed list of five, shipped with the app. There is no screen to change them. A missing product is skipped.
+- A product belongs to exactly one category, using the source's categories.
+- The home page shows the featured products and category links only. Category links are also in the header.
+- A category page shows its featured products first, then the rest in source order.
+- Search matches the title or the description, ignoring case. A blank term shows a prompt and no products.
+  - The backend owns the rule: `GET /api/search?q=` trims the term, matches it literally anywhere in the title or description (including inside words), and returns no products for a blank or missing term. The search page also shows the prompt for a blank term without calling the backend, so a blank search costs no request. The page's idea of "blank" is only a shortcut for the same rule.
+  - Results are in source order, and a featured product shows no rating, as everywhere. Submitting the same term again searches again.
+  - Cut: after a search the keyboard focus stays in the header and the page title does not change; the status messages are announced to screen readers, the results heading is not focused.
+- An enquiry is about one product, with name, email address and message. A valid enquiry emails the sales inbox. The form then closes with a green tick and a short confirmation (naming the address the enquirer gave), and a Thank you toast appears for a few seconds. A failed send never shows either. The enquirer gets no email. Invalid input stays on the form and sends nothing. A failed send shows an error, never a Thank you. The page treats only the backend's `201` as sent, so any other reply, even a success-looking one from something in front of the backend, shows the error.
+- There are no accounts and enquiries are not stored. The email is the only record.
+- The product page shows image, title, price, description, category and Enquire. It shows the rating, except for featured products. The rating never chooses or orders products.
+- Price is shown in US dollars. There is no cart or checkout.
+- Unknown products and categories show a not-found page. If the product source is down, the page says products are unavailable and offers a retry.
+- Product data from the source is cached for five minutes (`CATALOGUE_CACHE_SECONDS`, default 300), and a failed read is never cached. The cache is inside the Catalogue module and holds only the source's own data as plain arrays; the featured list, ordering and rating hiding are applied after it, so changing `FEATURED_PRODUCT_IDS` takes effect at once.
+  - It is one shared entry for the whole catalogue, in Laravel's cache (the `file` store locally). The first visitor after expiry waits for the source; there is no background refresh, no stale data served when the source fails after the entry expires, and no protection against several visitors refreshing at the same moment. The source has about twenty products, so these are acceptable for a proof of concept.
+  - A cached entry that cannot be read back (damaged, or written by other code) is dropped and the source is read again. Setting `CATALOGUE_CACHE_SECONDS=0` turns the cache off.
+  - It stores arrays and not `Product` objects because Laravel's cache does not turn stored data back into arbitrary objects. The cache tests run against a serializing store for that reason.
+- Product images are loaded by the browser straight from the image address the source gives us (Fake Store's image host). The product data itself goes only through our backend, but the image bytes do not. This is a deliberate trade-off against a strict reading of "all product data must go through your backend" and ADR 0001: the data and every API call go through our backend, while the image files are static assets on the source's host. We chose it to keep the proof of concept small. The way out is an image route on our backend that fetches and returns the image, so the browser never contacts the source; it would be a small ticket if a reviewer wants the strict reading. After the review raised this, the alternatives were explained to the developer (a backend image route, or images copied into storage we own), and the developer chose to keep loading images from the source.
+- The featured product ids default to `3,5,11,12,18` (one or more from each Fake Store category) and are set with `FEATURED_PRODUCT_IDS`.
+- Fake Store spells one category "jewelery". We show the source's own spelling.
+- A category is known when the source has at least one product in it, and its name must match exactly, including case. A category page lists its featured products first (in the configured order), then the rest in source order. A product id repeated in `FEATURED_PRODUCT_IDS` counts once.
+- Any address that is not one of our pages shows a not-found page. Under the Vite dev server, a URL with a malformed `%` escape (such as `/category/100%`) gets an empty 404 from the dev server before the app loads. That is dev-server behaviour that the app cannot change.
+
+## Dropped or simplified
+
+- No rate limit on the enquiry endpoint. A script could flood the sales inbox. Next step: limit enquiries per visitor.
+- No paging. The source has about twenty products.
+- No stored enquiries and no confirmation email to the enquirer.
+
+## How the design grows
+
+- The product source and the email provider are each behind an interface (ADR 0001, ADR 0002).
+- The frontend only knows our own product shape: `id`, `title`, `price`, `description`, `category`, `image`, an optional `rating` and a `featured` flag. Source field names never reach the browser.
+- Backend modules:
+  - **Catalogue** (`featured`, `inCategory`, `search`, `product`, `categories`) holds the featured list, ordering, search, rating hiding, not-found and unavailable outcomes, and the cache. It reads products through the product source, which has a single method, `all()`. A `find(id)` was planned but dropped: the source has about twenty products and nothing needs a single-product lookup that `all()` cannot answer, so the smaller interface wins.
+  - **Enquiries** (`submit`) holds validation and email composition. It gets the product from Catalogue and sends through the mail provider (`send`).
+  - Controllers only translate requests and responses.
+- The five featured product ids live in Laravel config, not in code.
+- The backend tells the frontend which products are featured (`featured: true`), in every response that carries products. The frontend shows a "Featured" badge from that flag and never works it out itself, so the rule stays in one place with the rating hiding.
+- Look and feel: a light beige theme with solid terracotta for the brand name and buttons, one stylesheet (`frontend/src/index.css`), no UI library. A full-page backdrop with a spinner shows while products load. Styling was checked by eye in one browser, not by tests.
+- Each seam has two adapters: Fake Store and in-memory for products, for mail, a Laravel adapter (sends through whichever `MAIL_MAILER` is configured: SMTP to Mailpit locally) and an in-memory one for tests.
+- An enquiry for an unknown product answers 404 before the input is validated, so nothing is checked or sent for a product that does not exist. The inbox address is `SALES_INBOX_EMAIL`.
+- Tests cross the module interfaces, using the in-memory adapters.
+
+## Next with another day
+
+In the order I would do them:
+
+- Rate limit enquiries, and decide whether to store them (today the email is the only record).
+- A real email provider behind the existing `MailProvider` interface, with a verified sender address.
+- An image route on the backend, if the strict reading of "all product data through the backend" is wanted.
+- Replace the dev servers (`php artisan serve`, Vite dev) with a production build and server, and add the infrastructure then (it should be AWS-compatible).
+- Paging, and an admin screen for the featured list, once the real catalogue is bigger than about twenty products.
+- Make the cache survive a source outage (serve the last good data) and stop several visitors refreshing at once.
+- Automated end-to-end browser tests for the enquiry and search flows, and move focus and the page title on search and navigation.
+- Show a clearer message when only the category links fail to load (today they are quietly left out) and tell apart "source down" from other errors.
