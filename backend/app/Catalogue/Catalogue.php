@@ -3,6 +3,7 @@
 namespace App\Catalogue;
 
 use Illuminate\Contracts\Cache\Repository as Cache;
+use Throwable;
 
 /**
  * What the shop window shows. Controllers ask this module and never apply
@@ -167,12 +168,33 @@ final class Catalogue
      */
     private function products(): array
     {
-        $rows = $this->cache->remember(
+        // A failed read of the source throws from here, uncaught and uncached.
+        $rows = $this->cachedRows();
+
+        try {
+            return array_map(Product::fromArray(...), $rows);
+        } catch (Throwable) {
+            // The stored entry is not what we wrote (damaged, or from another
+            // version of the code). Drop it and read the source afresh rather
+            // than failing every view until it expires.
+            $this->cache->forget(self::CACHE_KEY);
+
+            return array_map(Product::fromArray(...), $this->cachedRows());
+        }
+    }
+
+    /**
+     * What the cache holds, or what the source just returned. Typed `mixed`
+     * because a cache can hand back anything; products() checks it.
+     *
+     * @return list<array<string, mixed>>|mixed
+     */
+    private function cachedRows(): mixed
+    {
+        return $this->cache->remember(
             self::CACHE_KEY,
             $this->cacheSeconds,
             fn () => array_map(fn (Product $product) => $product->toArray(), $this->source->all()),
         );
-
-        return array_map(Product::fromArray(...), $rows);
     }
 }

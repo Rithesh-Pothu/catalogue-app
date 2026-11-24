@@ -75,6 +75,29 @@ class CatalogueCacheTest extends TestCase
         $this->assertSame(2, $this->source->reads);
     }
 
+    public function test_at_exactly_five_minutes_the_source_is_read_again(): void
+    {
+        $this->viewEverything();
+        $this->travel(5)->minutes();
+        $this->viewEverything();
+
+        $this->assertSame(2, $this->source->reads);
+    }
+
+    public function test_an_unreadable_cached_entry_is_discarded_and_the_source_is_read_again(): void
+    {
+        foreach (['not a list', [['id' => 1]], [['id' => 'x', 'title' => [], 'price' => 'free']]] as $damaged) {
+            $this->app->make('cache')->put('catalogue.products', $damaged, 300);
+            $reads = $this->source->reads;
+
+            $this->getJson('/api/featured-products')->assertOk();
+
+            $this->assertSame($reads + 1, $this->source->reads);
+            $this->getJson('/api/featured-products')->assertOk();
+            $this->assertSame($reads + 1, $this->source->reads, 'the repaired entry is reused');
+        }
+    }
+
     public function test_a_failed_read_is_not_cached_so_the_next_view_tries_again(): void
     {
         $this->source->failing = true;
