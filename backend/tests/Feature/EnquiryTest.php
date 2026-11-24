@@ -49,6 +49,23 @@ class EnquiryTest extends TestCase
         $this->assertSame('priya@example.com', $email['replyTo']);
     }
 
+    public function test_a_line_break_in_a_product_title_cannot_add_email_headers(): void
+    {
+        $this->app->instance(ProductSource::class, new InMemoryProductSource([
+            new Product(4, "Sneaky\r\nBcc: attacker@example.com", 9.0, 'x', 'electronics', 'https://img.test/4.png', null),
+        ]));
+
+        $this->postJson('/api/products/4/enquiries', [
+            'name' => 'Priya Shah',
+            'email' => 'priya@example.com',
+            'message' => 'Hello',
+        ])->assertCreated();
+
+        $subject = $this->mail->sent()[0]['subject'];
+        $this->assertStringNotContainsString("\n", $subject);
+        $this->assertStringNotContainsString("\r", $subject);
+    }
+
     public function test_a_failed_send_answers_502_and_never_says_thank_you(): void
     {
         $this->app->instance(MailProvider::class, new class implements MailProvider

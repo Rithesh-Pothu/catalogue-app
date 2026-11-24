@@ -129,6 +129,20 @@ describe('Enquiry form', () => {
     expect(screen.getByRole('button', { name: 'Send enquiry' })).toBeEnabled()
   })
 
+  it('shows an error, not silence, when the backend rejects the enquiry without saying which field', async () => {
+    stubBackend({
+      ...pageReplies,
+      '/api/products/3/enquiries': { status: 422, body: { message: 'Invalid.' } },
+    })
+    const user = await openEnquiryForm()
+
+    await fillIn(user, valid)
+    await user.click(screen.getByRole('button', { name: 'Send enquiry' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent("We couldn't send your enquiry. Please try again.")
+    expect(screen.queryByText('Thank you for your enquiry.')).not.toBeInTheDocument()
+  })
+
   it('shows the same error when the backend cannot be reached', async () => {
     stubBackend({ ...pageReplies, '/api/products/3/enquiries': 'network-error' })
     const user = await openEnquiryForm()

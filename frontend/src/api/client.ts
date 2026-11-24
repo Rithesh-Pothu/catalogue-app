@@ -82,7 +82,11 @@ export async function sendEnquiry(productId: number, input: EnquiryInput): Promi
   }
   if (response.status === 422) {
     const body = (await response.json().catch(() => ({}))) as { errors?: EnquiryErrors }
-    throw new EnquiryRejected(body.errors ?? {})
+    // A rejection that names no field gives the form nothing to show: treat it as not sent.
+    if (!body.errors || Object.keys(body.errors).length === 0) {
+      throw new EnquiryNotSent()
+    }
+    throw new EnquiryRejected(body.errors)
   }
   if (!response.ok) {
     throw new EnquiryNotSent()

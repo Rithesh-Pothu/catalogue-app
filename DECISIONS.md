@@ -34,7 +34,8 @@ Architecture decisions are in `docs/adr/`. Domain terms are in `GLOSSARY.md`.
   - **Enquiries** (`submit`) holds validation and email composition. It gets the product from Catalogue and sends through the mail provider (`send`).
   - Controllers only translate requests and responses.
 - The five featured product ids live in Laravel config, not in code.
-- Each seam has two adapters: Fake Store and in-memory for products, SMTP (Mailpit) and in-memory for mail.
+- Each seam has two adapters: Fake Store and in-memory for products, for mail, a Laravel adapter (sends through whichever `MAIL_MAILER` is configured: SMTP to Mailpit locally) and an in-memory one for tests.
+- An enquiry for an unknown product answers 404 before the input is validated, so nothing is checked or sent for a product that does not exist. The inbox address is `SALES_INBOX_EMAIL`.
 - Tests cross the module interfaces, using the in-memory adapters.
 
 ## Next with another day
