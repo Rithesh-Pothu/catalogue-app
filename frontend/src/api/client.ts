@@ -18,12 +18,22 @@ export class ProductsUnavailable extends Error {
   }
 }
 
+/** The backend has nothing at the address we asked for. */
+export class NotFound extends Error {
+  constructor() {
+    super('Not found.')
+  }
+}
+
 async function getData<T>(path: string): Promise<T> {
   let response: Response
   try {
     response = await fetch(path)
   } catch {
     throw new ProductsUnavailable()
+  }
+  if (response.status === 404) {
+    throw new NotFound()
   }
   if (!response.ok) {
     throw new ProductsUnavailable()
@@ -34,3 +44,5 @@ async function getData<T>(path: string): Promise<T> {
 export const getFeaturedProducts = () => getData<Product[]>('/api/featured-products')
 
 export const getCategories = () => getData<string[]>('/api/categories')
+
+export const getProduct = (id: string) => getData<Product>(`/api/products/${encodeURIComponent(id)}`)

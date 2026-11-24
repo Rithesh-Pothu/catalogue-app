@@ -18,7 +18,7 @@ export default function HomePage() {
   if (featured.status === 'loading') {
     return <p>Loading…</p>
   }
-  if (featured.status === 'unavailable') {
+  if (featured.status !== 'ready') {
     return <Unavailable onRetry={retry} />
   }
 

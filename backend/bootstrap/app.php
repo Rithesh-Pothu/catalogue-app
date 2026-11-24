@@ -1,5 +1,6 @@
 <?php
 
+use App\Catalogue\ProductNotFound;
 use App\Catalogue\ProductSourceUnavailable;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -20,6 +21,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(fn (ProductSourceUnavailable $exception) => response()->json(
             ['message' => 'Products are unavailable right now.'],
             503,
+        ));
+
+        $exceptions->render(fn (ProductNotFound $exception) => response()->json(
+            ['message' => 'Product not found.'],
+            404,
         ));
 
         $exceptions->shouldRenderJsonWhen(

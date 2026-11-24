@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
+import { NotFound } from './api/client'
 
 export type Load<T> =
   | { status: 'loading' }
   | { status: 'ready'; data: T }
+  | { status: 'not-found' }
   | { status: 'unavailable' }
 
 /** Runs `fetcher` on mount and again whenever `reload` is called. */
@@ -16,8 +18,10 @@ export function useLoad<T>(fetcher: () => Promise<T>): [Load<T>, () => void] {
       (data) => {
         if (!cancelled) setState({ status: 'ready', data })
       },
-      () => {
-        if (!cancelled) setState({ status: 'unavailable' })
+      (error: unknown) => {
+        if (!cancelled) {
+          setState({ status: error instanceof NotFound ? 'not-found' : 'unavailable' })
+        }
       },
     )
     return () => {

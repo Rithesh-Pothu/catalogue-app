@@ -41,6 +41,23 @@ final class Catalogue
     }
 
     /**
+     * One product, for its own page. Featured products carry no rating here
+     * either, so Featured stays the only highlight everywhere.
+     *
+     * @throws ProductNotFound when there is no product with that id
+     */
+    public function product(int $id): Product
+    {
+        foreach ($this->source->all() as $product) {
+            if ($product->id === $id) {
+                return in_array($id, $this->featuredProductIds, true) ? $product->withoutRating() : $product;
+            }
+        }
+
+        throw new ProductNotFound("There is no product with id {$id}.");
+    }
+
+    /**
      * Every category once, in the order the source first mentions it.
      *
      * @return list<string>
