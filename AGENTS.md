@@ -1,0 +1,2 @@
+# Project instructions
+Build an extensible product catalogue within the challenge time-box. Read docs/CHALLENGE.pdf before planning. Use React TypeScript; PHP Laravel. All product data must pass through the backend. Keep product and email providers replaceable. Record assumptions, use vertical slices and critical-path tests, review generated code, and never fabricate AI usage or test results. Work on a feature branch and leave the PR open against main. Do not commit secrets. Ask the developer before major scope changes.
