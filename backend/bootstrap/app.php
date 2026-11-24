@@ -1,5 +1,6 @@
 <?php
 
+use App\Catalogue\CategoryNotFound;
 use App\Catalogue\ProductNotFound;
 use App\Catalogue\ProductSourceUnavailable;
 use App\Enquiries\MailDeliveryFailed;
@@ -26,6 +27,11 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $exceptions->render(fn (ProductNotFound $exception) => response()->json(
             ['message' => 'Product not found.'],
+            404,
+        ));
+
+        $exceptions->render(fn (CategoryNotFound $exception) => response()->json(
+            ['message' => 'Category not found.'],
             404,
         ));
 

@@ -68,6 +68,41 @@ final class Catalogue
     }
 
     /**
+     * The products of one category: its featured products first, in the
+     * configured order, then the rest as the source returned them. A category
+     * is known when the source has at least one product in it; the name must
+     * match exactly.
+     *
+     * @return list<Product>
+     *
+     * @throws CategoryNotFound when no product is in that category
+     */
+    public function inCategory(string $category): array
+    {
+        $inCategory = array_values(array_filter(
+            $this->source->all(),
+            fn (Product $product) => $product->category === $category,
+        ));
+
+        if ($inCategory === []) {
+            throw new CategoryNotFound("There is no category called {$category}.");
+        }
+
+        $featured = [];
+        foreach ($this->featuredProductIds as $id) {
+            foreach ($inCategory as $product) {
+                if ($product->id === $id) {
+                    $featured[] = $product;
+                }
+            }
+        }
+
+        $rest = array_filter($inCategory, fn (Product $product) => ! in_array($product, $featured, true));
+
+        return array_map($this->present(...), [...$featured, ...$rest]);
+    }
+
+    /**
      * How a product is shown to a visitor. Featured is the only highlight, so a
      * featured product carries no rating wherever it appears. Every method that
      * returns products to show goes through here, so the rule lives once.

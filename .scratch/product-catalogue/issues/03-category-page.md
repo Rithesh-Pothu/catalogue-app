@@ -4,10 +4,10 @@
 
 **Blocked by:** 02: Home page shows the featured products.
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] A category page lists its featured products first
-- [ ] The remaining products in that category follow in source order
-- [ ] A category with no featured products shows only its remaining products
-- [ ] An unknown category shows a not-found page
-- [ ] Backend request-level tests cover featured-first ordering, a category with no featured products, and an unknown category
+- [x] A category page lists its featured products first
+- [x] The remaining products in that category follow in source order
+- [x] A category with no featured products shows only its remaining products
+- [x] An unknown category shows a not-found page
+- [x] Backend request-level tests cover featured-first ordering, a category with no featured products, and an unknown category
