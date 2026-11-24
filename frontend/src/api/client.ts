@@ -9,6 +9,7 @@ export type Product = {
   category: string
   image: string
   rating: number | null
+  featured: boolean
 }
 
 /** Products could not be loaded: the backend said so, or could not be reached. */

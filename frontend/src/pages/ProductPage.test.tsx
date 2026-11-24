@@ -28,6 +28,25 @@ function renderAt(path: string) {
 }
 
 describe('Product page', () => {
+  it('marks a featured product as featured, and others not', async () => {
+    stubBackend({
+      '/api/categories': categories,
+      '/api/products/3': { status: 200, body: { data: hardDrive({ featured: true, rating: null }) } },
+    })
+    renderAt('/products/3')
+    expect(await screen.findByText('Featured')).toBeInTheDocument()
+  })
+
+  it('shows no featured badge on an ordinary product', async () => {
+    stubBackend({
+      '/api/categories': categories,
+      '/api/products/3': { status: 200, body: { data: hardDrive() } },
+    })
+    renderAt('/products/3')
+    await screen.findByRole('heading', { level: 1 })
+    expect(screen.queryByText('Featured')).not.toBeInTheDocument()
+  })
+
   it('shows the product details and an Enquire button', async () => {
     stubBackend({
       '/api/categories': categories,

@@ -41,6 +41,22 @@ describe('Category page', () => {
     expect(within(tiles[0]).getByRole('link')).toHaveAttribute('href', '/products/5')
   })
 
+  it('marks only the featured products with a featured badge', async () => {
+    stubBackend({
+      '/api/categories': categories,
+      "/api/categories/men's%20clothing/products": {
+        status: 200,
+        body: { data: [{ ...product(5, 'Featured Jacket'), featured: true }, product(1, 'Backpack')] },
+      },
+    })
+
+    renderAt("/category/men's%20clothing")
+
+    const tiles = await screen.findAllByRole('article')
+    expect(within(tiles[0]).getByText('Featured')).toBeInTheDocument()
+    expect(within(tiles[1]).queryByText('Featured')).not.toBeInTheDocument()
+  })
+
   it('opens a product when a visitor clicks its tile on the category page', async () => {
     const user = userEvent.setup()
     stubBackend({

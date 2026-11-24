@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getProduct } from '../api/client'
 import EnquiryForm from '../components/EnquiryForm'
+import FeaturedBadge from '../components/FeaturedBadge'
 import Loading from '../components/Loading'
 import NotFound from '../components/NotFound'
 import Unavailable from '../components/Unavailable'
@@ -28,6 +29,7 @@ function ProductDetails({ id }: { id: string }) {
     <article className="product">
       <img src={data.image} alt={data.title} />
       <div>
+        {data.featured && <FeaturedBadge />}
         <h1>{data.title}</h1>
         <p className="price">{formatPrice(data.price)}</p>
         {data.rating !== null && <p>Rating: {data.rating}</p>}

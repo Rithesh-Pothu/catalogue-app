@@ -44,8 +44,8 @@ describe('Home page', () => {
         body: {
           data: [
             // Even if a rating arrived, a featured product tile must not show it.
-            productFixture({ id: 3, title: 'Mens Cotton Jacket', price: 55.99, rating: 4.5 }),
-            productFixture({ id: 5, title: 'Gold Bracelet', price: 695, category: 'jewelery' }),
+            productFixture({ id: 3, title: 'Mens Cotton Jacket', price: 55.99, rating: 4.5, featured: true }),
+            productFixture({ id: 5, title: 'Gold Bracelet', price: 695, category: 'jewelery', featured: true }),
           ],
         },
       },
@@ -56,6 +56,7 @@ describe('Home page', () => {
 
     expect(await screen.findByRole('heading', { name: 'Mens Cotton Jacket' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Gold Bracelet' })).toBeInTheDocument()
+    expect(screen.getAllByText('Featured')).toHaveLength(2)
     expect(screen.getByText('$55.99')).toBeInTheDocument()
     expect(screen.getByText('$695.00')).toBeInTheDocument()
     expect(screen.getByRole('img', { name: 'Mens Cotton Jacket' })).toHaveAttribute(

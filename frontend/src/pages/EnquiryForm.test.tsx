@@ -53,8 +53,12 @@ describe('Enquiry form', () => {
     await fillIn(user, valid)
     await user.click(screen.getByRole('button', { name: 'Send enquiry' }))
 
-    expect(await screen.findByRole('status')).toHaveTextContent('Thank you for your enquiry.')
-    expect(screen.getByLabelText('Name')).toHaveValue('')
+    const toast = await screen.findByText('Thank you for your enquiry.')
+    expect(toast).toBeInTheDocument()
+    // The form closes and a confirmation with a tick takes its place.
+    expect(await screen.findByRole('heading', { name: 'Enquiry sent' })).toBeInTheDocument()
+    expect(screen.getByText(/We'll reply to priya@example\.com/)).toBeInTheDocument()
+    expect(screen.queryByLabelText('Name')).not.toBeInTheDocument()
     const [, init] = fetchMock.mock.calls.find(([url]) => url === '/api/products/3/enquiries')!
     expect(init?.method).toBe('POST')
     expect(JSON.parse(init?.body as string)).toEqual(valid)

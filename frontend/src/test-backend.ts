@@ -31,5 +31,6 @@ export const productFixture = (overrides: Partial<Record<string, unknown>> = {})
   category: "men's clothing",
   image: 'https://img.test/1.png',
   rating: null,
+  featured: false,
   ...overrides,
 })
