@@ -2,7 +2,7 @@
 
 A catalogue where visitors see five featured products, browse categories, search, open a product and send an enquiry that arrives in the sales inbox. It is built as a foundation to grow rather than a throwaway.
 
-**Run it:** `docker compose up`, then open <http://localhost:5173>. Read the sales inbox in Mailpit at <http://localhost:8025>. No accounts, no secrets, no manual setup. Details are in the [README](../../README.md).
+**Run it:** `docker compose up`, then open <http://localhost:5173>. Read the sales inbox in Mailpit at <http://localhost:8025>. No accounts, no secrets, no manual setup. Details are in the [README](https://github.com/Rithesh-Pothu/catalogue-app/blob/feature/product-catalogue/README.md).
 
 ### Choices and why
 
@@ -14,7 +14,7 @@ A catalogue where visitors see five featured products, browse categories, search
 
 ### Assumptions I made where the brief was unclear
 
-Full list in [`DECISIONS.md`](../../DECISIONS.md). The main ones: the featured five are configured, not edited in a screen (`FEATURED_PRODUCT_IDS`); search matches title or description, ignoring case, and a blank term shows a prompt instead of everything; a category page shows its featured products first; the enquirer gets no confirmation email; an enquiry that fails to send shows an error, never a Thank you.
+Full list in [`DECISIONS.md`](https://github.com/Rithesh-Pothu/catalogue-app/blob/feature/product-catalogue/DECISIONS.md). The main ones: the featured five are configured, not edited in a screen (`FEATURED_PRODUCT_IDS`); search matches title or description, ignoring case, and a blank term shows a prompt instead of everything; a category page shows its featured products first; the enquirer gets no confirmation email; an enquiry that fails to send shows an error, never a Thank you.
 
 ### What I cut or simplified, and why
 
@@ -32,4 +32,4 @@ Tests go through the HTTP API with in-memory adapters, plus one test against a r
 
 ### AI usage and time
 
-See [`AI_USAGE.md`](../../AI_USAGE.md): tools and models, the instruction files and plan, five key moments, the mistakes the AI made and how each was caught, and the time split (developer-confirmed and approximate).
+See [`AI_USAGE.md`](https://github.com/Rithesh-Pothu/catalogue-app/blob/feature/product-catalogue/AI_USAGE.md): tools and models, the instruction files and plan, five key moments, the mistakes the AI made and how each was caught, and the time split (developer-confirmed and approximate).
