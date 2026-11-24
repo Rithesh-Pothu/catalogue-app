@@ -4,10 +4,10 @@
 
 **Blocked by:** None (can start immediately).
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] `docker compose up` starts the React app, the backend and Mailpit with no paid accounts
-- [ ] The React app shows a result fetched from the backend through a single API client, with no direct call to Fake Store
-- [ ] An example env file is committed and no secrets are committed
-- [ ] The backend test runner and the frontend test runner each run one passing test
-- [ ] Mailpit's inbox is reachable in a browser
+- [x] `docker compose up` starts the React app, the backend and Mailpit with no paid accounts
+- [x] The React app shows a result fetched from the backend through a single API client, with no direct call to Fake Store
+- [x] An example env file is committed and no secrets are committed
+- [x] The backend test runner and the frontend test runner each run one passing test
+- [x] Mailpit's inbox is reachable in a browser
