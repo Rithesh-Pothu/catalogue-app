@@ -48,7 +48,13 @@ Architecture decisions are in `docs/adr/`. Domain terms are in `GLOSSARY.md`.
 
 ## Next with another day
 
-- Rate limit enquiries.
-- Paging and a real admin for featured products.
-- Store enquiries.
-- A real email provider.
+In the order I would do them:
+
+- Rate limit enquiries, and decide whether to store them (today the email is the only record).
+- A real email provider behind the existing `MailProvider` interface, with a verified sender address.
+- An image route on the backend, if the strict reading of "all product data through the backend" is wanted.
+- Replace the dev servers (`php artisan serve`, Vite dev) with a production build and server, and add the infrastructure then (it should be AWS-compatible).
+- Paging, and an admin screen for the featured list, once the real catalogue is bigger than about twenty products.
+- Make the cache survive a source outage (serve the last good data) and stop several visitors refreshing at once.
+- Automated end-to-end browser tests for the enquiry and search flows, and move focus and the page title on search and navigation.
+- Show a clearer message when only the category links fail to load (today they are quietly left out) and tell apart "source down" from other errors.
