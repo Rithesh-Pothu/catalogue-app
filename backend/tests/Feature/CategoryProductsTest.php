@@ -90,6 +90,29 @@ class CategoryProductsTest extends TestCase
         $this->assertSame([1], $this->idsIn("men's clothing"));
     }
 
+    public function test_a_category_name_with_a_slash_or_other_reserved_characters_is_found(): void
+    {
+        $this->catalogueOf([
+            $this->product(1, 'audio/video'),
+            $this->product(2, '100% cotton? #1'),
+        ], featured: []);
+
+        $this->assertSame([1], $this->idsIn('audio/video'));
+        $this->assertSame([2], $this->idsIn('100% cotton? #1'));
+    }
+
+    public function test_a_product_listed_twice_as_featured_is_shown_once(): void
+    {
+        $this->catalogueOf([
+            $this->product(1, 'electronics'),
+            $this->product(2, 'electronics'),
+        ], featured: [2, 2]);
+
+        $this->assertSame([2, 1], $this->idsIn('electronics'));
+        $featured = $this->getJson('/api/featured-products')->assertOk()->json('data');
+        $this->assertSame([2], array_column($featured, 'id'));
+    }
+
     public function test_an_unknown_category_is_not_found(): void
     {
         $this->catalogueOf([$this->product(1, 'electronics')], featured: []);

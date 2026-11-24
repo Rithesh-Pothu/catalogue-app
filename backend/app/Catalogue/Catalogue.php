@@ -8,13 +8,19 @@ namespace App\Catalogue;
  */
 final class Catalogue
 {
+    /** @var list<int> */
+    private readonly array $featuredProductIds;
+
     /**
      * @param  list<int>  $featuredProductIds  the featured products, in display order
      */
     public function __construct(
         private readonly ProductSource $source,
-        private readonly array $featuredProductIds,
-    ) {}
+        array $featuredProductIds,
+    ) {
+        // A product listed twice is still one featured product.
+        $this->featuredProductIds = array_values(array_unique($featuredProductIds));
+    }
 
     /**
      * The featured products, in the configured order. A featured id the

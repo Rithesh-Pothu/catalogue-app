@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it } from 'vitest'
 import App from '../App'
+import { categoryPath } from '../format'
 import { productFixture, stubBackend } from '../test-backend'
 
 const categories = { status: 200, body: { data: ["men's clothing", 'electronics'] } }
@@ -57,6 +58,22 @@ describe('Category page', () => {
 
     expect(await screen.findByRole('heading', { level: 1, name: 'electronics' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { level: 3, name: 'Hard drive' })).toBeInTheDocument()
+  })
+
+  it('finds a category whose name has reserved characters, from its link to the backend request', async () => {
+    const name = 'audio/video? 100% #1'
+    stubBackend({
+      '/api/categories': { status: 200, body: { data: [name] } },
+      [`/api/categories/${encodeURIComponent(name)}/products`]: {
+        status: 200,
+        body: { data: [item(7, 'Speaker', name)] },
+      },
+    })
+
+    renderAt(categoryPath(name))
+
+    expect(await screen.findByRole('heading', { level: 1, name })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 3, name: 'Speaker' })).toBeInTheDocument()
   })
 
   it('shows a not-found page for a category that does not exist', async () => {
