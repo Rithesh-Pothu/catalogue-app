@@ -9,6 +9,9 @@ Architecture decisions are in `docs/adr/`. Domain terms are in `GLOSSARY.md`.
 - The home page shows the featured products and category links only. Category links are also in the header.
 - A category page shows its featured products first, then the rest in source order.
 - Search matches the title or the description, ignoring case. A blank term shows a prompt and no products.
+  - The backend owns the rule: `GET /api/search?q=` trims the term, matches it literally anywhere in the title or description (including inside words), and returns no products for a blank or missing term. The search page also shows the prompt for a blank term without calling the backend, so a blank search costs no request. The page's idea of "blank" is only a shortcut for the same rule.
+  - Results are in source order, and a featured product shows no rating, as everywhere. Submitting the same term again searches again.
+  - Cut: after a search the keyboard focus stays in the header and the page title does not change; the status messages are announced to screen readers, the results heading is not focused.
 - An enquiry is about one product, with name, email address and message. A valid enquiry emails the sales inbox and shows a Thank you. The enquirer gets no email. Invalid input stays on the form and sends nothing. A failed send shows an error, never a Thank you.
 - There are no accounts and enquiries are not stored. The email is the only record.
 - The product page shows image, title, price, description, category and Enquire. It shows the rating, except for featured products. The rating never chooses or orders products.

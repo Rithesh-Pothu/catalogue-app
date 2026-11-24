@@ -70,6 +70,32 @@ describe('Search', () => {
     expect(fetchMock.mock.calls.map(([url]) => url)).toContain('/api/search?q=cotton')
   })
 
+  it('searches when the visitor presses Enter in the search box', async () => {
+    const user = userEvent.setup()
+    stubBackend({ ...base, '/api/search?q=cotton': { status: 200, body: { data: [item(1, 'Cotton Jacket')] } } })
+
+    renderAt('/')
+    await user.type(await screen.findByRole('searchbox', { name: 'Search products' }), 'cotton{Enter}')
+
+    expect(await screen.findByRole('heading', { level: 3, name: 'Cotton Jacket' })).toBeInTheDocument()
+  })
+
+  it('searches again when the visitor submits the same term again', async () => {
+    const user = userEvent.setup()
+    stubBackend({
+      ...base,
+      '/api/search?q=jacket': { status: 503, body: { message: 'Products are unavailable right now.' } },
+    })
+
+    renderAt('/search?q=jacket')
+    expect(await screen.findByText('Products are unavailable right now.')).toBeInTheDocument()
+
+    stubBackend({ ...base, '/api/search?q=jacket': { status: 200, body: { data: [item(1, 'Jacket')] } } })
+    await user.click(screen.getByRole('button', { name: 'Search' }))
+
+    expect(await screen.findByRole('heading', { level: 3, name: 'Jacket' })).toBeInTheDocument()
+  })
+
   it('sends the term as the visitor typed it, safely encoded', async () => {
     const user = userEvent.setup()
     stubBackend({

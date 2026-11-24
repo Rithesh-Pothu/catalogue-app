@@ -65,6 +65,17 @@ class SearchTest extends TestCase
         $this->assertSame([], $this->idsFor('.*'));
     }
 
+    public function test_matching_ignores_case_for_accented_letters_too(): void
+    {
+        $this->app->instance(ProductSource::class, new InMemoryProductSource([
+            new Product(1, 'Café Table', 80.0, 'Wooden', 'furniture', 'https://img.test/1.png', null),
+            new Product(2, 'Lamp', 20.0, 'Great for a CAFÉ corner', 'furniture', 'https://img.test/2.png', null),
+        ]));
+
+        $this->assertSame([1, 2], $this->idsFor('café'));
+        $this->assertSame([1, 2], $this->idsFor('CAFÉ'));
+    }
+
     public function test_a_term_with_no_matches_returns_no_products(): void
     {
         $this->getJson('/api/search?q=submarine')->assertOk()->assertExactJson(['data' => []]);

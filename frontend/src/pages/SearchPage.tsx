@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useLocation, useSearchParams } from 'react-router-dom'
 import { searchProducts } from '../api/client'
 import ProductTile from '../components/ProductTile'
 import Unavailable from '../components/Unavailable'
@@ -10,7 +10,7 @@ function Results({ term }: { term: string }) {
   const [results, reload] = useLoad(fetchResults)
 
   if (results.status === 'loading') {
-    return <p>Loading…</p>
+    return <p role="status">Loading…</p>
   }
   if (results.status !== 'ready') {
     return <Unavailable onRetry={reload} />
@@ -20,7 +20,7 @@ function Results({ term }: { term: string }) {
     <section>
       <h1>Results for "{term}"</h1>
       {results.data.length === 0 ? (
-        <p>Nothing found for "{term}".</p>
+        <p role="status">Nothing found for "{term}".</p>
       ) : (
         <div className="tiles">
           {results.data.map((product) => (
@@ -34,12 +34,14 @@ function Results({ term }: { term: string }) {
 
 export default function SearchPage() {
   const [params] = useSearchParams()
+  const { key } = useLocation()
   const term = (params.get('q') ?? '').trim()
 
   // A blank term is a prompt, not a search: nothing is asked of the backend.
   if (term === '') {
-    return <p>Enter a search term to find products.</p>
+    return <p role="status">Enter a search term to find products.</p>
   }
-  // Keyed by term so a new search always starts from a fresh load.
-  return <Results key={term} term={term} />
+  // Keyed by the visit, not just the term, so submitting the same term again
+  // searches again (useful after the products were unavailable).
+  return <Results key={key} term={term} />
 }
