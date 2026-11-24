@@ -12,7 +12,7 @@ Architecture decisions are in `docs/adr/`. Domain terms are in `GLOSSARY.md`.
   - The backend owns the rule: `GET /api/search?q=` trims the term, matches it literally anywhere in the title or description (including inside words), and returns no products for a blank or missing term. The search page also shows the prompt for a blank term without calling the backend, so a blank search costs no request. The page's idea of "blank" is only a shortcut for the same rule.
   - Results are in source order, and a featured product shows no rating, as everywhere. Submitting the same term again searches again.
   - Cut: after a search the keyboard focus stays in the header and the page title does not change; the status messages are announced to screen readers, the results heading is not focused.
-- An enquiry is about one product, with name, email address and message. A valid enquiry emails the sales inbox and shows a Thank you. The enquirer gets no email. Invalid input stays on the form and sends nothing. A failed send shows an error, never a Thank you. The page treats only the backend's `201` as sent, so any other reply, even a success-looking one from something in front of the backend, shows the error.
+- An enquiry is about one product, with name, email address and message. A valid enquiry emails the sales inbox. The form then closes with a green tick and a short confirmation (naming the address the enquirer gave), and a Thank you toast appears for a few seconds. A failed send never shows either. The enquirer gets no email. Invalid input stays on the form and sends nothing. A failed send shows an error, never a Thank you. The page treats only the backend's `201` as sent, so any other reply, even a success-looking one from something in front of the backend, shows the error.
 - There are no accounts and enquiries are not stored. The email is the only record.
 - The product page shows image, title, price, description, category and Enquire. It shows the rating, except for featured products. The rating never chooses or orders products.
 - Price is shown in US dollars. There is no cart or checkout.
@@ -36,12 +36,14 @@ Architecture decisions are in `docs/adr/`. Domain terms are in `GLOSSARY.md`.
 ## How the design grows
 
 - The product source and the email provider are each behind an interface (ADR 0001, ADR 0002).
-- The frontend only knows our own product shape: `id`, `title`, `price`, `description`, `category`, `image` and an optional `rating`. Source field names never reach the browser.
+- The frontend only knows our own product shape: `id`, `title`, `price`, `description`, `category`, `image`, an optional `rating` and a `featured` flag. Source field names never reach the browser.
 - Backend modules:
   - **Catalogue** (`featured`, `inCategory`, `search`, `product`, `categories`) holds the featured list, ordering, search, rating hiding, not-found and unavailable outcomes, and the cache. It reads products through the product source, which has a single method, `all()`. A `find(id)` was planned but dropped: the source has about twenty products and nothing needs a single-product lookup that `all()` cannot answer, so the smaller interface wins.
   - **Enquiries** (`submit`) holds validation and email composition. It gets the product from Catalogue and sends through the mail provider (`send`).
   - Controllers only translate requests and responses.
 - The five featured product ids live in Laravel config, not in code.
+- The backend tells the frontend which products are featured (`featured: true`), in every response that carries products. The frontend shows a "Featured" badge from that flag and never works it out itself, so the rule stays in one place with the rating hiding.
+- Look and feel: a light beige theme with solid terracotta for the brand name and buttons, one stylesheet (`frontend/src/index.css`), no UI library. A full-page backdrop with a spinner shows while products load. Styling was checked by eye in one browser, not by tests.
 - Each seam has two adapters: Fake Store and in-memory for products, for mail, a Laravel adapter (sends through whichever `MAIL_MAILER` is configured: SMTP to Mailpit locally) and an in-memory one for tests.
 - An enquiry for an unknown product answers 404 before the input is validated, so nothing is checked or sent for a product that does not exist. The inbox address is `SALES_INBOX_EMAIL`.
 - Tests cross the module interfaces, using the in-memory adapters.

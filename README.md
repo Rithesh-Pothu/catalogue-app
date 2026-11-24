@@ -77,7 +77,7 @@ React app  ──/api──▶  Laravel backend ──▶ ProductSource  ──�
 | Route | Purpose |
 | --- | --- |
 | `GET /api/health` | `{"status":"ok"}`, used by Docker's health check |
-| `GET /api/featured-products` | The featured products, without ratings |
+| `GET /api/featured-products` | The featured products, without ratings. Every product in every response has a `featured` flag |
 | `GET /api/categories` | Category names |
 | `GET /api/categories/{category}/products` | Featured products first, then the rest in source order |
 | `GET /api/search?q=` | Products whose title or description contains the term, ignoring case |
