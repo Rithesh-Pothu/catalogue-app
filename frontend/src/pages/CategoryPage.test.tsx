@@ -8,7 +8,7 @@ import { productFixture, stubBackend } from '../test-backend'
 
 const categories = { status: 200, body: { data: ["men's clothing", 'electronics'] } }
 
-const item = (id: number, title: string, category = "men's clothing") =>
+const product = (id: number, title: string, category = "men's clothing") =>
   productFixture({ id, title, category, image: `https://img.test/${id}.png` })
 
 function renderAt(path: string) {
@@ -25,7 +25,7 @@ describe('Category page', () => {
       '/api/categories': categories,
       "/api/categories/men's%20clothing/products": {
         status: 200,
-        body: { data: [item(5, 'Featured Jacket'), item(1, 'Backpack'), item(3, 'T-shirt')] },
+        body: { data: [product(5, 'Featured Jacket'), product(1, 'Backpack'), product(3, 'T-shirt')] },
       },
     })
 
@@ -41,6 +41,21 @@ describe('Category page', () => {
     expect(within(tiles[0]).getByRole('link')).toHaveAttribute('href', '/products/5')
   })
 
+  it('opens a product when a visitor clicks its tile on the category page', async () => {
+    const user = userEvent.setup()
+    stubBackend({
+      '/api/categories': categories,
+      '/api/categories/electronics/products': { status: 200, body: { data: [product(4, 'Hard drive', 'electronics')] } },
+      '/api/products/4': { status: 200, body: { data: product(4, 'Hard drive', 'electronics') } },
+    })
+
+    renderAt('/category/electronics')
+    await user.click(await screen.findByRole('link', { name: /Hard drive/ }))
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Hard drive' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Enquire' })).toBeInTheDocument()
+  })
+
   it('opens from a category link on the home page', async () => {
     const user = userEvent.setup()
     stubBackend({
@@ -48,7 +63,7 @@ describe('Category page', () => {
       '/api/featured-products': { status: 200, body: { data: [] } },
       '/api/categories/electronics/products': {
         status: 200,
-        body: { data: [item(4, 'Hard drive', 'electronics')] },
+        body: { data: [product(4, 'Hard drive', 'electronics')] },
       },
     })
 
@@ -66,7 +81,7 @@ describe('Category page', () => {
       '/api/categories': { status: 200, body: { data: [name] } },
       [`/api/categories/${encodeURIComponent(name)}/products`]: {
         status: 200,
-        body: { data: [item(7, 'Speaker', name)] },
+        body: { data: [product(7, 'Speaker', name)] },
       },
     })
 
@@ -100,7 +115,7 @@ describe('Category page', () => {
 
     stubBackend({
       '/api/categories': categories,
-      '/api/categories/electronics/products': { status: 200, body: { data: [item(4, 'Hard drive', 'electronics')] } },
+      '/api/categories/electronics/products': { status: 200, body: { data: [product(4, 'Hard drive', 'electronics')] } },
     })
     await user.click(screen.getByRole('button', { name: 'Try again' }))
 

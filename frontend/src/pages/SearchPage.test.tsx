@@ -12,7 +12,7 @@ const base = {
   '/api/products/3': { status: 200, body: { data: productFixture({ id: 3 }) } },
 }
 
-const item = (id: number, title: string) => productFixture({ id, title, image: `https://img.test/${id}.png` })
+const product = (id: number, title: string) => productFixture({ id, title, image: `https://img.test/${id}.png` })
 
 function renderAt(path: string) {
   return render(
@@ -53,7 +53,7 @@ describe('Search', () => {
     const user = userEvent.setup()
     const fetchMock = stubBackend({
       ...base,
-      '/api/search?q=cotton': { status: 200, body: { data: [item(1, 'Cotton Jacket'), item(2, 'Cotton Dress')] } },
+      '/api/search?q=cotton': { status: 200, body: { data: [product(1, 'Cotton Jacket'), product(2, 'Cotton Dress')] } },
     })
 
     renderAt('/')
@@ -72,7 +72,7 @@ describe('Search', () => {
 
   it('searches when the visitor presses Enter in the search box', async () => {
     const user = userEvent.setup()
-    stubBackend({ ...base, '/api/search?q=cotton': { status: 200, body: { data: [item(1, 'Cotton Jacket')] } } })
+    stubBackend({ ...base, '/api/search?q=cotton': { status: 200, body: { data: [product(1, 'Cotton Jacket')] } } })
 
     renderAt('/')
     await user.type(await screen.findByRole('searchbox', { name: 'Search products' }), 'cotton{Enter}')
@@ -90,7 +90,7 @@ describe('Search', () => {
     renderAt('/search?q=jacket')
     expect(await screen.findByText('Products are unavailable right now.')).toBeInTheDocument()
 
-    stubBackend({ ...base, '/api/search?q=jacket': { status: 200, body: { data: [item(1, 'Jacket')] } } })
+    stubBackend({ ...base, '/api/search?q=jacket': { status: 200, body: { data: [product(1, 'Jacket')] } } })
     await user.click(screen.getByRole('button', { name: 'Search' }))
 
     expect(await screen.findByRole('heading', { level: 3, name: 'Jacket' })).toBeInTheDocument()
@@ -100,7 +100,7 @@ describe('Search', () => {
     const user = userEvent.setup()
     stubBackend({
       ...base,
-      '/api/search?q=100%25%20%26%20co%2Fol%3F': { status: 200, body: { data: [item(9, 'Odd one')] } },
+      '/api/search?q=100%25%20%26%20co%2Fol%3F': { status: 200, body: { data: [product(9, 'Odd one')] } },
     })
 
     renderAt('/')
@@ -110,8 +110,23 @@ describe('Search', () => {
     expect(await screen.findByRole('heading', { level: 3, name: 'Odd one' })).toBeInTheDocument()
   })
 
+  it('opens a product when a visitor clicks its tile in the search results', async () => {
+    const user = userEvent.setup()
+    stubBackend({
+      ...base,
+      '/api/search?q=cotton': { status: 200, body: { data: [product(3, 'Cotton Jacket')] } },
+      '/api/products/3': { status: 200, body: { data: productFixture({ id: 3, title: 'Cotton Jacket' }) } },
+    })
+
+    renderAt('/search?q=cotton')
+    await user.click(await screen.findByRole('link', { name: /Cotton Jacket/ }))
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Cotton Jacket' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Enquire' })).toBeInTheDocument()
+  })
+
   it('keeps the term in the search box on the results page', async () => {
-    stubBackend({ ...base, '/api/search?q=cotton': { status: 200, body: { data: [item(1, 'Cotton Jacket')] } } })
+    stubBackend({ ...base, '/api/search?q=cotton': { status: 200, body: { data: [product(1, 'Cotton Jacket')] } } })
 
     renderAt('/search?q=cotton')
 
@@ -163,7 +178,7 @@ describe('Search', () => {
     renderAt('/search?q=jacket')
     expect(await screen.findByText('Products are unavailable right now.')).toBeInTheDocument()
 
-    stubBackend({ ...base, '/api/search?q=jacket': { status: 200, body: { data: [item(1, 'Jacket')] } } })
+    stubBackend({ ...base, '/api/search?q=jacket': { status: 200, body: { data: [product(1, 'Jacket')] } } })
     await user.click(screen.getByRole('button', { name: 'Try again' }))
 
     expect(await screen.findByRole('heading', { level: 3, name: 'Jacket' })).toBeInTheDocument()

@@ -143,6 +143,21 @@ describe('Enquiry form', () => {
     expect(screen.queryByText('Thank you for your enquiry.')).not.toBeInTheDocument()
   })
 
+  it('does not say thank you for a success-looking reply that is not the backend\'s 201', async () => {
+    // For example an error page from a proxy in front of the backend, sent with status 200.
+    stubBackend({
+      ...pageReplies,
+      '/api/products/3/enquiries': { status: 200, body: '<html>Gateway page</html>' },
+    })
+    const user = await openEnquiryForm()
+
+    await fillIn(user, valid)
+    await user.click(screen.getByRole('button', { name: 'Send enquiry' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent("We couldn't send your enquiry. Please try again.")
+    expect(screen.queryByText('Thank you for your enquiry.')).not.toBeInTheDocument()
+  })
+
   it('shows the same error when the backend cannot be reached', async () => {
     stubBackend({ ...pageReplies, '/api/products/3/enquiries': 'network-error' })
     const user = await openEnquiryForm()

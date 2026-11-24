@@ -22,7 +22,7 @@ No rate limit on enquiries, no stored enquiries, no paging, no admin screen, no 
 
 ### How it was tested
 
-Tests go through the HTTP API with in-memory adapters, plus one test against a recorded Fake Store response; the frontend tests stub `fetch` and drive the real components. Last run in a **fresh clone of this branch**: backend 56 passed (204 assertions), frontend 36 passed, type check clean, lint 0 warnings, production build succeeded. A real enquiry sent through that stack arrived in Mailpit. Not covered: automated end-to-end browser tests, browsers other than Cursor's built-in one.
+Tests go through the HTTP API with in-memory adapters, plus one test against a recorded Fake Store response; the frontend tests stub `fetch` and drive the real components. Last run in a **fresh clone of this branch**: backend 56 passed (204 assertions), frontend 36 passed, type check clean, lint 0 warnings, production build succeeded. A real enquiry sent through that stack arrived in Mailpit. After that run, three frontend tests and a small controller cleanup were added; the working copy then passed backend 56, frontend 39, type check and lint (not re-run in a fresh clone). Not covered: automated end-to-end browser tests, browsers other than Cursor's built-in one.
 
 ### Things worth knowing
 

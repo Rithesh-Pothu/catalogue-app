@@ -41,6 +41,7 @@ These are the problems the agent observed and recorded during the work; commits 
 | **The first cache version passed all 54 tests but returned HTTP 500 on every cached read in the real app.** The file cache hands back `__PHP_Incomplete_Class`, and the test cache never serializes. | The agent timed real requests after the tests were green. The second request was a 500. | The cache now stores plain arrays. The cache tests run against a serializing store, which reproduced the failure before the fix (`8668c9f`, `d45af9b`). |
 | A fix for damaged cache entries also swallowed real source failures, so a failed view read the source twice. | A test written for the cache slice failed. | The catch was narrowed to decoding only (`d45af9b`). |
 | `php artisan test` failed in a fresh clone: `Test directory "/app/tests/Unit" not found`. Git does not track empty folders. | A timed run of the committed code from a fresh clone. | `tests/Unit/.gitkeep` committed (`55874ba`). |
+| A rename of a test helper with BSD `sed` changed the definition but not its uses (`\b` is not supported there), which would have broken the file. | `grep` for the old name still found six uses, before the tests were run. | Redone with a script; the whole suite then passed. |
 
 Smaller points: a lint warning about setting state inside an effect (fixed); a blank product image in an early screenshot was lazy loading, not a bug; and during the enquiry form check the browser tool's typing left the textarea empty in the backend's view. The agent's explanation is that this was a tool artifact, because the same flow worked when the value was set the standard way and the component tests (which type with `userEvent`) pass. That explanation is a judgement, not a proven cause. A change to functional state updates was made as hardening and is **not** claimed to be a fix.
 
@@ -54,6 +55,7 @@ Last full run, in a **fresh clone of the committed branch** (not the working cop
 - Frontend: `vitest` — 36 passed in 5 files (the runner counts each `it.each` case). `tsc -b` clean. `oxlint` 0 warnings, 0 errors. `npm run build` succeeded.
 - `docker compose up` from that clone reached a working app in 35 seconds with Docker's base images already cached on this machine. A first-time image download is not included in that figure and was not measured.
 - A real enquiry sent through that stack arrived in Mailpit addressed to the sales inbox.
+- After that run, three frontend tests (two tile click-throughs, one for the stricter `201` rule) and a small behaviour-preserving cleanup of the controllers were added. The checks were then run again in the **working copy**, not a fresh clone: backend 56 passed (204 assertions), frontend 39 passed, `tsc -b` clean, `oxlint` 0 warnings and 0 errors.
 
 Not verified: browsers other than the one built into Cursor; automated end-to-end browser tests (none exist); behaviour on the reviewer's machine; any AWS deployment (no infrastructure is included).
 

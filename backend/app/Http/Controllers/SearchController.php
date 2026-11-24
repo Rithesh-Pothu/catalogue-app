@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Catalogue\Catalogue;
-use App\Catalogue\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -15,8 +14,6 @@ class SearchController extends Controller
         $term = $request->query('q');
         $term = is_string($term) ? $term : '';
 
-        return response()->json([
-            'data' => array_map(fn (Product $product) => $product->toArray(), $catalogue->search($term)),
-        ]);
+        return $this->productList($catalogue->search($term));
     }
 }

@@ -94,7 +94,9 @@ export async function sendEnquiry(productId: number, input: EnquiryInput): Promi
     }
     throw new EnquiryRejected(body.errors)
   }
-  if (!response.ok) {
+  // Our backend answers 201 when the email was sent. Any other status, even a
+  // success-looking one (such as an error page from a proxy), is not a send.
+  if (response.status !== 201) {
     throw new EnquiryNotSent()
   }
 }
