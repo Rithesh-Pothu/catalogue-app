@@ -12,6 +12,7 @@
 - [x] The enquirer receives no email
 - [x] A blank name, a blank message, or an invalid email address is rejected by the backend, shows the field errors, keeps what was typed, and sends nothing
 - [x] When sending fails, an error is shown and never a Thank you
+- [x] Only the backend's 201 reply counts as sent; any other reply shows the error
 - [x] An enquiry for an unknown product is not sent
 - [x] The mail provider has a Laravel adapter (SMTP to Mailpit locally, set by `MAIL_MAILER`) and an in-memory adapter
 - [x] Backend request-level tests cover a valid enquiry, each invalid field, a failed send and an unknown product

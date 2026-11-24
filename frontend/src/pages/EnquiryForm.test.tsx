@@ -144,7 +144,8 @@ describe('Enquiry form', () => {
   })
 
   it('does not say thank you for a success-looking reply that is not the backend\'s 201', async () => {
-    // For example an error page from a proxy in front of the backend, sent with status 200.
+    // A reply with a success status that is not the backend's 201 (for example from a proxy
+    // in front of it). It has to count as not sent. This test failed before the `!== 201` check.
     stubBackend({
       ...pageReplies,
       '/api/products/3/enquiries': { status: 200, body: '<html>Gateway page</html>' },
