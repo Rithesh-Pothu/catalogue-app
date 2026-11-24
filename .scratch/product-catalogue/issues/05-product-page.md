@@ -4,12 +4,12 @@
 
 **Blocked by:** 02: Home page shows the featured products.
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Clicking a product tile opens that product's page
-- [ ] The page shows image, title, price in US dollars, description, category and an Enquire button
-- [ ] A non-featured product with a rating shows the rating
-- [ ] A non-featured product without a rating omits the rating line
-- [ ] A featured product shows no rating
-- [ ] An unknown product shows a not-found page
-- [ ] Backend request-level tests cover the product flow, rating shown, rating hidden for a featured product, and an unknown product
+- [x] Clicking a product tile opens that product's page
+- [x] The page shows image, title, price in US dollars, description, category and an Enquire button
+- [x] A non-featured product with a rating shows the rating
+- [x] A non-featured product without a rating omits the rating line
+- [x] A featured product shows no rating
+- [x] An unknown product shows a not-found page
+- [x] Backend request-level tests cover the product flow, rating shown, rating hidden for a featured product, and an unknown product

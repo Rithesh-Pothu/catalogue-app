@@ -17,8 +17,7 @@ final class Catalogue
     ) {}
 
     /**
-     * The featured products, in the configured order. Featured is the only
-     * highlight, so a featured product carries no rating. A featured id the
+     * The featured products, in the configured order. A featured id the
      * source does not have is skipped.
      *
      * @return list<Product>
@@ -33,7 +32,7 @@ final class Catalogue
         $featured = [];
         foreach ($this->featuredProductIds as $id) {
             if (isset($byId[$id])) {
-                $featured[] = $byId[$id]->withoutRating();
+                $featured[] = $this->present($byId[$id]);
             }
         }
 
@@ -41,8 +40,7 @@ final class Catalogue
     }
 
     /**
-     * One product, for its own page. Featured products carry no rating here
-     * either, so Featured stays the only highlight everywhere.
+     * One product, for its own page.
      *
      * @throws ProductNotFound when there is no product with that id
      */
@@ -50,7 +48,7 @@ final class Catalogue
     {
         foreach ($this->source->all() as $product) {
             if ($product->id === $id) {
-                return in_array($id, $this->featuredProductIds, true) ? $product->withoutRating() : $product;
+                return $this->present($product);
             }
         }
 
@@ -67,5 +65,17 @@ final class Catalogue
         return array_values(array_unique(
             array_map(fn (Product $product) => $product->category, $this->source->all()),
         ));
+    }
+
+    /**
+     * How a product is shown to a visitor. Featured is the only highlight, so a
+     * featured product carries no rating wherever it appears. Every method that
+     * returns products to show goes through here, so the rule lives once.
+     */
+    private function present(Product $product): Product
+    {
+        return in_array($product->id, $this->featuredProductIds, true)
+            ? $product->withoutRating()
+            : $product;
     }
 }

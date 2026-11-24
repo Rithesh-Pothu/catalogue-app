@@ -9,4 +9,5 @@ Route::get('/health', fn () => response()->json(['status' => 'ok']));
 
 Route::get('/featured-products', FeaturedProductsController::class);
 Route::get('/categories', CategoriesController::class);
-Route::get('/products/{id}', ProductController::class)->whereNumber('id');
+// Ids are small whole numbers; anything else cannot be a product, so it is a 404.
+Route::get('/products/{id}', ProductController::class)->where('id', '[0-9]{1,9}');

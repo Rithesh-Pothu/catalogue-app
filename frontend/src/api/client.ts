@@ -19,7 +19,7 @@ export class ProductsUnavailable extends Error {
 }
 
 /** The backend has nothing at the address we asked for. */
-export class NotFound extends Error {
+export class ResourceNotFound extends Error {
   constructor() {
     super('Not found.')
   }
@@ -33,7 +33,7 @@ async function getData<T>(path: string): Promise<T> {
     throw new ProductsUnavailable()
   }
   if (response.status === 404) {
-    throw new NotFound()
+    throw new ResourceNotFound()
   }
   if (!response.ok) {
     throw new ProductsUnavailable()

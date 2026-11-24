@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { NotFound } from './api/client'
+import { ResourceNotFound } from './api/client'
 
 export type Load<T> =
   | { status: 'loading' }
@@ -20,7 +20,7 @@ export function useLoad<T>(fetcher: () => Promise<T>): [Load<T>, () => void] {
       },
       (error: unknown) => {
         if (!cancelled) {
-          setState({ status: error instanceof NotFound ? 'not-found' : 'unavailable' })
+          setState({ status: error instanceof ResourceNotFound ? 'not-found' : 'unavailable' })
         }
       },
     )

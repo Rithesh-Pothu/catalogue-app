@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Catalogue\InMemoryProductSource;
 use App\Catalogue\Product;
 use App\Catalogue\ProductSource;
+use App\Catalogue\ProductSourceUnavailable;
 use Tests\TestCase;
 
 class ProductTest extends TestCase
@@ -58,5 +59,37 @@ class ProductTest extends TestCase
         $this->app->instance(ProductSource::class, new InMemoryProductSource([]));
 
         $this->getJson('/api/products/backpack')->assertNotFound();
+    }
+
+    public function test_a_product_id_too_large_to_be_real_is_not_found(): void
+    {
+        $this->app->instance(ProductSource::class, new InMemoryProductSource([]));
+
+        $this->getJson('/api/products/99999999999999999999')->assertNotFound();
+    }
+
+    public function test_a_product_page_answers_503_unavailable_when_the_source_is_down(): void
+    {
+        $this->app->instance(ProductSource::class, new class implements ProductSource
+        {
+            public function all(): array
+            {
+                throw new ProductSourceUnavailable('The source is down.');
+            }
+        });
+
+        $this->getJson('/api/products/1')
+            ->assertStatus(503)
+            ->assertExactJson(['message' => 'Products are unavailable right now.']);
+    }
+
+    public function test_a_product_without_a_rating_has_none_on_its_page(): void
+    {
+        config(['catalogue.featured_product_ids' => []]);
+        $this->app->instance(ProductSource::class, new InMemoryProductSource([
+            new Product(7, 'Lamp', 20.0, 'A desk lamp', 'electronics', 'https://img.test/7.png'),
+        ]));
+
+        $this->getJson('/api/products/7')->assertOk()->assertJsonPath('data.rating', null);
     }
 }
