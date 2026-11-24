@@ -83,6 +83,19 @@ class CategoryProductsTest extends TestCase
         $this->assertSame(4.5, $products[1]['rating']);
     }
 
+    public function test_each_product_says_whether_it_is_featured(): void
+    {
+        $this->catalogueOf([
+            $this->product(1, 'electronics'),
+            $this->product(2, 'electronics'),
+        ], featured: [2]);
+
+        $products = $this->getJson('/api/categories/electronics/products')->assertOk()->json('data');
+
+        $this->assertSame([2, 1], array_column($products, 'id'));
+        $this->assertSame([true, false], array_column($products, 'featured'));
+    }
+
     public function test_a_category_name_with_spaces_and_an_apostrophe_is_found(): void
     {
         $this->catalogueOf([$this->product(1, "men's clothing")], featured: []);

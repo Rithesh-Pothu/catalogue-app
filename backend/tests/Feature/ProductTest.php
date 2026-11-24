@@ -28,6 +28,7 @@ class ProductTest extends TestCase
             'category' => 'electronics',
             'image' => 'https://img.test/3.png',
             'rating' => 3.3,
+            'featured' => false,
         ]]);
     }
 
@@ -91,5 +92,15 @@ class ProductTest extends TestCase
         ]));
 
         $this->getJson('/api/products/7')->assertOk()->assertJsonPath('data.rating', null);
+    }
+
+    public function test_a_featured_product_page_says_it_is_featured(): void
+    {
+        config(['catalogue.featured_product_ids' => [1]]);
+        $this->app->instance(ProductSource::class, new InMemoryProductSource([
+            new Product(1, 'Backpack', 109.95, 'A sturdy backpack', "men's clothing", 'https://img.test/1.png', 3.9),
+        ]));
+
+        $this->getJson('/api/products/1')->assertOk()->assertJsonPath('data.featured', true);
     }
 }

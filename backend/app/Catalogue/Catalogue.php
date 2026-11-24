@@ -148,7 +148,7 @@ final class Catalogue
     private function present(Product $product): Product
     {
         return in_array($product->id, $this->featuredProductIds, true)
-            ? $product->withoutRating()
+            ? $product->asFeatured()
             : $product;
     }
 

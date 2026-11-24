@@ -16,9 +16,13 @@ final readonly class Product
         public string $category,
         public string $image,
         public ?float $rating = null,
+        public bool $featured = false,
     ) {}
 
-    public function withoutRating(): self
+    /**
+     * How a featured product is shown: marked as featured, and without a rating.
+     */
+    public function asFeatured(): self
     {
         return new self(
             $this->id,
@@ -28,6 +32,7 @@ final readonly class Product
             $this->category,
             $this->image,
             null,
+            true,
         );
     }
 
@@ -46,6 +51,7 @@ final readonly class Product
             $data['category'],
             $data['image'],
             $data['rating'],
+            $data['featured'] ?? false,
         );
     }
 
@@ -62,6 +68,7 @@ final readonly class Product
             'category' => $this->category,
             'image' => $this->image,
             'rating' => $this->rating,
+            'featured' => $this->featured,
         ];
     }
 }

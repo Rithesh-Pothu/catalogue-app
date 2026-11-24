@@ -30,6 +30,7 @@ class FeaturedProductsTest extends TestCase
                 'category' => 'jewelery',
                 'image' => 'https://img.test/2.png',
                 'rating' => null,
+                'featured' => true,
             ],
             [
                 'id' => 1,
@@ -39,6 +40,7 @@ class FeaturedProductsTest extends TestCase
                 'category' => "men's clothing",
                 'image' => 'https://img.test/1.png',
                 'rating' => null,
+                'featured' => true,
             ],
         ]]);
     }
