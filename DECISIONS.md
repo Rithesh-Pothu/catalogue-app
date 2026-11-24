@@ -14,7 +14,7 @@ Architecture decisions are in `docs/adr/`. Domain terms are in `GLOSSARY.md`.
 - The product page shows image, title, price, description, category and Enquire. It shows the rating, except for featured products. The rating never chooses or orders products.
 - Price is shown in US dollars. There is no cart or checkout.
 - Unknown products and categories show a not-found page. If the product source is down, the page says products are unavailable and offers a retry.
-- Product data is cached for five minutes. Failures are not cached.
+- Product data will be cached for five minutes, and failures will not be cached. This is not built yet (ticket 07). Until then every page view reads the source.
 - Product images are loaded by the browser straight from the image address the source gives us (Fake Store's image host). The product data itself goes only through our backend, but the image bytes do not. This is a known gap against "all product data must go through your backend" and ADR 0001. The alternative is an image route on our backend that fetches and returns the image; it is not built yet.
 - The featured product ids default to `3,5,11,12,18` (one or more from each Fake Store category) and are set with `FEATURED_PRODUCT_IDS`.
 - Fake Store spells one category "jewelery". We show the source's own spelling.

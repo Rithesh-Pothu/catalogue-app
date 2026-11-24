@@ -58,7 +58,7 @@ A React TypeScript web app talks only to a Laravel backend. The backend reads pr
   - hiding the rating for featured products everywhere;
   - the not-found and source-unavailable outcomes;
   - a five-minute cache of product data, with failures not cached, kept internal to the module.
-- **Product source seam** with `all()` and `find(id)`. Categories and search are derived from `all()`. Adapters: Fake Store and in-memory.
+- **Product source seam** with a single method, `all()`. Categories, search and single-product lookups are derived from it, because the source has only about twenty products. Adapters: Fake Store and in-memory.
 - **Enquiries module** with `submit`. It owns validation of name, email address and message, getting the product from Catalogue, and composing the email. It returns sent, invalid with field errors, or failed. A missing product is not-found.
 - **Mail provider seam** with `send`. Adapters: SMTP (Mailpit locally) and in-memory (ADR 0002).
 - Controllers only translate requests and responses and hold no rules.

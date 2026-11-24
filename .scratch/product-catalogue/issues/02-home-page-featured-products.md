@@ -4,13 +4,13 @@
 
 **Blocked by:** 01: Project skeleton runs with one command.
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] The home page shows the five featured products, chosen by product ids in configuration
-- [ ] A featured product missing from the source is skipped and the page still loads
-- [ ] A featured product shows no rating
-- [ ] The home page and the header show category links
-- [ ] The backend returns our own product shape and never Fake Store's field names
-- [ ] The product source has a Fake Store adapter and an in-memory adapter, and the Fake Store adapter has one test against a recorded sample response
-- [ ] When the source is down, the page says products are unavailable and offers a retry
-- [ ] Backend request-level tests cover the home flow, a missing featured product, and the source being down
+- [x] The home page shows the five featured products, chosen by product ids in configuration
+- [x] A featured product missing from the source is skipped and the page still loads
+- [x] A featured product shows no rating
+- [x] The home page and the header show category links
+- [x] The backend returns our own product shape and never Fake Store's field names
+- [x] The product source has a Fake Store adapter and an in-memory adapter, and the Fake Store adapter has one test against a recorded sample response
+- [x] When the source is down, the page says products are unavailable and offers a retry
+- [x] Backend request-level tests cover the home flow, a missing featured product, and the source being down

@@ -57,7 +57,7 @@ class FeaturedProductsTest extends TestCase
         $this->assertSame([1, 2], array_column($response->json('data'), 'id'));
     }
 
-    public function test_the_home_page_says_products_are_unavailable_when_the_source_is_down(): void
+    public function test_featured_products_answer_503_unavailable_when_the_source_is_down(): void
     {
         $this->app->instance(ProductSource::class, new class implements ProductSource
         {

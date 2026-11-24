@@ -8,11 +8,18 @@ namespace App\Catalogue;
  */
 final class Catalogue
 {
-    public function __construct(private readonly ProductSource $source) {}
+    /**
+     * @param  list<int>  $featuredProductIds  the featured products, in display order
+     */
+    public function __construct(
+        private readonly ProductSource $source,
+        private readonly array $featuredProductIds,
+    ) {}
 
     /**
      * The featured products, in the configured order. Featured is the only
-     * highlight, so a featured product carries no rating.
+     * highlight, so a featured product carries no rating. A featured id the
+     * source does not have is skipped.
      *
      * @return list<Product>
      */
@@ -24,7 +31,7 @@ final class Catalogue
         }
 
         $featured = [];
-        foreach (config('catalogue.featured_product_ids') as $id) {
+        foreach ($this->featuredProductIds as $id) {
             if (isset($byId[$id])) {
                 $featured[] = $byId[$id]->withoutRating();
             }

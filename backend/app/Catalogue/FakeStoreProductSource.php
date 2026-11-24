@@ -22,7 +22,7 @@ final class FakeStoreProductSource implements ProductSource
     public function all(): array
     {
         try {
-            $items = Http::baseUrl($this->baseUrl)
+            $rows = Http::baseUrl($this->baseUrl)
                 ->timeout($this->timeoutSeconds)
                 ->acceptJson()
                 ->get('/products')
@@ -32,30 +32,30 @@ final class FakeStoreProductSource implements ProductSource
             throw new ProductSourceUnavailable('Could not read products from Fake Store.', 0, $exception);
         }
 
-        if (! is_array($items)) {
+        if (! is_array($rows)) {
             throw new ProductSourceUnavailable('Fake Store did not return a list of products.');
         }
 
-        return array_map($this->toProduct(...), array_values($items));
+        return array_map($this->toProduct(...), array_values($rows));
     }
 
     /**
-     * @param  mixed  $item
+     * @param  mixed  $row  one product exactly as Fake Store describes it
      */
-    private function toProduct($item): Product
+    private function toProduct($row): Product
     {
-        if (! is_array($item) || array_diff(self::REQUIRED_FIELDS, array_keys($item)) !== []) {
+        if (! is_array($row) || array_diff(self::REQUIRED_FIELDS, array_keys($row)) !== []) {
             throw new ProductSourceUnavailable('Fake Store returned a product we could not read.');
         }
 
         return new Product(
-            id: (int) $item['id'],
-            title: (string) $item['title'],
-            price: (float) $item['price'],
-            description: (string) $item['description'],
-            category: (string) $item['category'],
-            image: (string) $item['image'],
-            rating: isset($item['rating']['rate']) ? (float) $item['rating']['rate'] : null,
+            id: (int) $row['id'],
+            title: (string) $row['title'],
+            price: (float) $row['price'],
+            description: (string) $row['description'],
+            category: (string) $row['category'],
+            image: (string) $row['image'],
+            rating: isset($row['rating']['rate']) ? (float) $row['rating']['rate'] : null,
         );
     }
 }

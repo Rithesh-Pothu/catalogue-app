@@ -20,7 +20,8 @@ describe('Home page', () => {
         status: 200,
         body: {
           data: [
-            productFixture({ id: 3, title: 'Mens Cotton Jacket', price: 55.99 }),
+            // Even if a rating arrived, a featured product tile must not show it.
+            productFixture({ id: 3, title: 'Mens Cotton Jacket', price: 55.99, rating: 4.5 }),
             productFixture({ id: 5, title: 'Gold Bracelet', price: 695, category: 'jewelery' }),
           ],
         },
@@ -38,6 +39,7 @@ describe('Home page', () => {
       'src',
       'https://img.test/1.png',
     )
+    expect(screen.queryByText(/4\.5/)).not.toBeInTheDocument()
     expect(screen.queryByText(/rating/i)).not.toBeInTheDocument()
   })
 
