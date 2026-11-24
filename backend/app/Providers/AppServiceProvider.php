@@ -8,6 +8,7 @@ use App\Catalogue\ProductSource;
 use App\Enquiries\Enquiries;
 use App\Enquiries\LaravelMailProvider;
 use App\Enquiries\MailProvider;
+use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -26,6 +27,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(Catalogue::class, fn ($app) => new Catalogue(
             $app->make(ProductSource::class),
             config('catalogue.featured_product_ids'),
+            $app->make(CacheRepository::class),
+            config('catalogue.cache_seconds'),
         ));
 
         // The one place that decides how email is delivered (ADR 0002).

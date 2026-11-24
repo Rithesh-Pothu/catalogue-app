@@ -2,21 +2,28 @@
 
 namespace App\Catalogue;
 
+use Illuminate\Contracts\Cache\Repository as Cache;
+
 /**
  * What the shop window shows. Controllers ask this module and never apply
  * catalogue rules themselves.
  */
 final class Catalogue
 {
+    private const CACHE_KEY = 'catalogue.products';
+
     /** @var list<int> */
     private readonly array $featuredProductIds;
 
     /**
      * @param  list<int>  $featuredProductIds  the featured products, in display order
+     * @param  int  $cacheSeconds  how long product data from the source is reused
      */
     public function __construct(
         private readonly ProductSource $source,
         array $featuredProductIds,
+        private readonly Cache $cache,
+        private readonly int $cacheSeconds,
     ) {
         // A product listed twice is still one featured product.
         $this->featuredProductIds = array_values(array_unique($featuredProductIds));
@@ -31,7 +38,7 @@ final class Catalogue
     public function featured(): array
     {
         $byId = [];
-        foreach ($this->source->all() as $product) {
+        foreach ($this->products() as $product) {
             $byId[$product->id] = $product;
         }
 
@@ -52,7 +59,7 @@ final class Catalogue
      */
     public function product(int $id): Product
     {
-        foreach ($this->source->all() as $product) {
+        foreach ($this->products() as $product) {
             if ($product->id === $id) {
                 return $this->present($product);
             }
@@ -69,7 +76,7 @@ final class Catalogue
     public function categories(): array
     {
         return array_values(array_unique(
-            array_map(fn (Product $product) => $product->category, $this->source->all()),
+            array_map(fn (Product $product) => $product->category, $this->products()),
         ));
     }
 
@@ -86,7 +93,7 @@ final class Catalogue
     public function inCategory(string $category): array
     {
         $inCategory = array_values(array_filter(
-            $this->source->all(),
+            $this->products(),
             fn (Product $product) => $product->category === $category,
         ));
 
@@ -124,7 +131,7 @@ final class Catalogue
         }
 
         $matches = array_filter(
-            $this->source->all(),
+            $this->products(),
             fn (Product $product) => mb_stripos($product->title, $term) !== false
                 || mb_stripos($product->description, $term) !== false,
         );
@@ -142,5 +149,30 @@ final class Catalogue
         return in_array($product->id, $this->featuredProductIds, true)
             ? $product->withoutRating()
             : $product;
+    }
+
+    /**
+     * Every product as the source returns them, reused for a few minutes so
+     * page views do not each call the source. Only the source's own data is
+     * cached; the featured list, ordering and rating hiding are applied on top
+     * afterwards, so a changed setting is never stale. A failed read throws
+     * and is therefore never cached: the next view tries the source again.
+     *
+     * The cache holds plain arrays, not Product objects: cache stores
+     * serialize what they keep and do not turn it back into arbitrary objects.
+     *
+     * @return list<Product>
+     *
+     * @throws ProductSourceUnavailable when the source cannot be read
+     */
+    private function products(): array
+    {
+        $rows = $this->cache->remember(
+            self::CACHE_KEY,
+            $this->cacheSeconds,
+            fn () => array_map(fn (Product $product) => $product->toArray(), $this->source->all()),
+        );
+
+        return array_map(Product::fromArray(...), $rows);
     }
 }

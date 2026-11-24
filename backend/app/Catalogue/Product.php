@@ -32,6 +32,24 @@ final readonly class Product
     }
 
     /**
+     * The inverse of toArray(), for data that was stored as plain values.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            $data['id'],
+            $data['title'],
+            $data['price'],
+            $data['description'],
+            $data['category'],
+            $data['image'],
+            $data['rating'],
+        );
+    }
+
+    /**
      * @return array<string, mixed>
      */
     public function toArray(): array

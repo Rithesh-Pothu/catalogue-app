@@ -4,9 +4,9 @@
 
 **Blocked by:** 02: Home page shows the featured products.
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Product data is reused for five minutes
-- [ ] A failed fetch is not cached, so the next view tries the source again
-- [ ] The cache is internal to the Catalogue module and changes none of its behaviour
-- [ ] A test shows the source is called once for repeated views within the time and called again after it expires
+- [x] Product data is reused for five minutes
+- [x] A failed fetch is not cached, so the next view tries the source again
+- [x] The cache is internal to the Catalogue module and changes none of its behaviour
+- [x] A test shows the source is called once for repeated views within the time and called again after it expires

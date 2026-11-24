@@ -12,6 +12,12 @@ return [
     ),
 
     /*
+    | How long product data from the source is reused before the source is
+    | read again: five minutes. A failed read is never kept.
+    */
+    'cache_seconds' => (int) env('CATALOGUE_CACHE_SECONDS', 300),
+
+    /*
     | The sales inbox: the one mailbox that receives every enquiry. Locally it
     | is read in Mailpit at http://localhost:8025.
     */
