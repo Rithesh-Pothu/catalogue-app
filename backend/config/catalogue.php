@@ -12,6 +12,12 @@ return [
     ),
 
     /*
+    | The sales inbox: the one mailbox that receives every enquiry. Locally it
+    | is read in Mailpit at http://localhost:8025.
+    */
+    'sales_inbox' => env('SALES_INBOX_EMAIL', 'sales@catalogue.test'),
+
+    /*
     | The Fake Store API, the current product source (ADR 0001). Only
     | App\Catalogue\FakeStoreProductSource reads these.
     */

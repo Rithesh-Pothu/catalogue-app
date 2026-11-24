@@ -6,7 +6,7 @@ import { vi } from 'vitest'
 type Reply = { status: number; body: unknown } | 'network-error'
 
 export function stubBackend(replies: Record<string, Reply>) {
-  const fetchMock = vi.fn(async (url: string) => {
+  const fetchMock = vi.fn(async (url: string, _init?: RequestInit) => {
     const reply = replies[url]
     if (reply === undefined) {
       throw new Error(`Unexpected request to ${url}`)

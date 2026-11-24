@@ -25,6 +25,28 @@ export class ResourceNotFound extends Error {
   }
 }
 
+export type EnquiryInput = { name: string; email: string; message: string }
+
+/** Field name → messages, as returned by the backend's validation. */
+export type EnquiryErrors = Partial<Record<keyof EnquiryInput, string[]>>
+
+/** The backend refused the enquiry because of what was typed. Nothing was sent. */
+export class EnquiryRejected extends Error {
+  readonly errors: EnquiryErrors
+
+  constructor(errors: EnquiryErrors) {
+    super('The enquiry was rejected.')
+    this.errors = errors
+  }
+}
+
+/** The enquiry could not be sent (mail failure, backend down, unknown product). */
+export class EnquiryNotSent extends Error {
+  constructor() {
+    super("We couldn't send your enquiry. Please try again.")
+  }
+}
+
 async function getData<T>(path: string): Promise<T> {
   let response: Response
   try {
@@ -46,3 +68,23 @@ export const getFeaturedProducts = () => getData<Product[]>('/api/featured-produ
 export const getCategories = () => getData<string[]>('/api/categories')
 
 export const getProduct = (id: string) => getData<Product>(`/api/products/${encodeURIComponent(id)}`)
+
+export async function sendEnquiry(productId: number, input: EnquiryInput): Promise<void> {
+  let response: Response
+  try {
+    response = await fetch(`/api/products/${productId}/enquiries`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify(input),
+    })
+  } catch {
+    throw new EnquiryNotSent()
+  }
+  if (response.status === 422) {
+    const body = (await response.json().catch(() => ({}))) as { errors?: EnquiryErrors }
+    throw new EnquiryRejected(body.errors ?? {})
+  }
+  if (!response.ok) {
+    throw new EnquiryNotSent()
+  }
+}

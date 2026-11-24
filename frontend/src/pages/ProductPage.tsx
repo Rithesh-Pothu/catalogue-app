@@ -1,6 +1,7 @@
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getProduct } from '../api/client'
+import EnquiryForm from '../components/EnquiryForm'
 import NotFound from '../components/NotFound'
 import Unavailable from '../components/Unavailable'
 import { categoryPath, formatPrice } from '../format'
@@ -9,6 +10,7 @@ import { useLoad } from '../useLoad'
 function ProductDetails({ id }: { id: string }) {
   const fetchProduct = useCallback(() => getProduct(id), [id])
   const [product, reload] = useLoad(fetchProduct)
+  const [enquiring, setEnquiring] = useState(false)
 
   if (product.status === 'loading') {
     return <p>Loading…</p>
@@ -32,7 +34,13 @@ function ProductDetails({ id }: { id: string }) {
           <Link to={categoryPath(data.category)}>{data.category}</Link>
         </p>
         <p>{data.description}</p>
-        <button type="button">Enquire</button>
+        {enquiring ? (
+          <EnquiryForm product={data} />
+        ) : (
+          <button type="button" onClick={() => setEnquiring(true)}>
+            Enquire
+          </button>
+        )}
       </div>
     </article>
   )

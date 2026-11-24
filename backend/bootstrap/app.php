@@ -2,6 +2,7 @@
 
 use App\Catalogue\ProductNotFound;
 use App\Catalogue\ProductSourceUnavailable;
+use App\Enquiries\MailDeliveryFailed;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -26,6 +27,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(fn (ProductNotFound $exception) => response()->json(
             ['message' => 'Product not found.'],
             404,
+        ));
+
+        $exceptions->render(fn (MailDeliveryFailed $exception) => response()->json(
+            ['message' => "We couldn't send your enquiry. Please try again."],
+            502,
         ));
 
         $exceptions->shouldRenderJsonWhen(

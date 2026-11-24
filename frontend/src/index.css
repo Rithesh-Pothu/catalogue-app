@@ -113,3 +113,32 @@ main {
   border: 1px solid #e3e5ea;
   border-radius: 0.5rem;
 }
+
+.enquiry {
+  display: grid;
+  gap: 0.9rem;
+  margin-top: 1rem;
+}
+
+.enquiry .field {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.enquiry input,
+.enquiry textarea {
+  padding: 0.5rem;
+  font: inherit;
+  border: 1px solid #b9bdc6;
+  border-radius: 0.3rem;
+}
+
+.enquiry [aria-invalid='true'] {
+  border-color: #b3261e;
+}
+
+.field-error,
+.enquiry [role='alert'] {
+  margin: 0;
+  color: #b3261e;
+}
