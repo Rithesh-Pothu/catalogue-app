@@ -1,11 +1,11 @@
 # AI usage
 
-Everything below is taken from what happened while building this repository, or was confirmed by the developer. Where something is approximate or not verified, it says so.
+Everything below comes from the agent's own account of this working session, from the repository and its git history, or from facts the developer confirmed. Only the repository and git history can be checked independently; where a row names a commit, it can be looked up. Where something is approximate or not verified, it says so.
 
 ## Tools and models
 
 - **Cursor** (agent mode) was the only AI tool used. Confirmed by the developer: no other AI tool or model was used.
-- **Model:** Claude Sonnet 5.5 is the model of the agent in the session that wrote the code and these docs. For code review, the agent launched Cursor sub-agents with the model `claude-sonnet-5-5-medium`. The model of any earlier part of the work was not recorded, so it is not claimed here.
+- **Model:** Claude Sonnet 5.5 is the model of the agent in the session that wrote the code and these docs. For code review, the agent launched Cursor sub-agents with the model `claude-sonnet-5-5-medium`. The model used for the earlier planning work (grilling, glossary, ADRs, spec and tickets) was not recorded, so it is not claimed here.
 - **Skills used** (Matt Pocock-style workflow skills, committed in the repo): `setup-matt-pocock-skills`, `grill-with-docs`, `domain-modeling`, `codebase-design`, `to-spec`, `to-tickets`, `implement` (which in turn calls `tdd` and `code-review`) and `record-ai-usage`.
 - **Browser tool:** Cursor's built-in browser was used by the agent to look at pages and run flows against the running app.
 
@@ -28,21 +28,21 @@ Committed to the repo:
 
 ## Where the AI was wrong, and how it was caught
 
-All of these happened. None is invented.
+These are the problems the agent observed and recorded during the work; commits are named where a fix can be looked up.
 
 | What went wrong | How it was caught | Outcome |
 | --- | --- | --- |
 | The Laravel scaffold's `backend/AGENTS.md` and `CLAUDE.md` contained instructions to run `curl … \| bash` and to set up Laravel Boost. | The agent read them before acting. | Not followed; files deleted; the developer was told. |
-| `GET /api/products/99999999999999999999` returned a 500 (a type error on the huge number). | Code review of the product page slice. | Route now accepts only 1 to 9 digits; test added. |
+| `GET /api/products/99999999999999999999` returned a 500 (a type error on the huge number). | Code review of the product page slice. | Route now accepts only 1 to 9 digits; test added (`8475b9e`). |
 | The docs claimed a cache and a `find(id)` method that did not exist yet. | Review compared the docs with the code. | Docs corrected, then the cache was built in ticket 07. |
-| A 422 reply with no field errors would have shown the visitor neither errors nor a Thank you. | Spec review of the enquiry slice. | It now shows the send-failed error; test added. |
-| A category name containing `/` could not be matched, and a product id repeated in `FEATURED_PRODUCT_IDS` was listed twice. | Spec review of the category slice. | Route accepts any name; ids are de-duplicated; tests added. |
-| Submitting the same search term again did nothing, even after an "unavailable" error. | Spec review of the search slice. | Every submit now searches again; test added. |
-| **The first cache version passed all 54 tests but returned HTTP 500 on every cached read in the real app.** The file cache hands back `__PHP_Incomplete_Class`, and the test cache never serializes. | The agent timed real requests after the tests were green. The second request was a 500. | The cache now stores plain arrays. The cache tests run against a serializing store, which reproduced the failure before the fix. |
-| A fix for damaged cache entries also swallowed real source failures, so a failed view read the source twice. | A test written for the cache slice failed. | The catch was narrowed to decoding only. |
-| `php artisan test` failed in a fresh clone: `Test directory "/app/tests/Unit" not found`. Git does not track empty folders. | A timed run of the committed code from a fresh clone. | `tests/Unit/.gitkeep` committed. |
+| A 422 reply with no field errors would have shown the visitor neither errors nor a Thank you. | Spec review of the enquiry slice. | It now shows the send-failed error; test added (`d7ad36a`). |
+| A category name containing `/` could not be matched, and a product id repeated in `FEATURED_PRODUCT_IDS` was listed twice. | Spec review of the category slice. | Route accepts any name; ids are de-duplicated; tests added (`3996c96`). |
+| Submitting the same search term again did nothing, even after an "unavailable" error. | Spec review of the search slice. | Every submit now searches again; test added (`229ed74`). |
+| **The first cache version passed all 54 tests but returned HTTP 500 on every cached read in the real app.** The file cache hands back `__PHP_Incomplete_Class`, and the test cache never serializes. | The agent timed real requests after the tests were green. The second request was a 500. | The cache now stores plain arrays. The cache tests run against a serializing store, which reproduced the failure before the fix (`8668c9f`, `d45af9b`). |
+| A fix for damaged cache entries also swallowed real source failures, so a failed view read the source twice. | A test written for the cache slice failed. | The catch was narrowed to decoding only (`d45af9b`). |
+| `php artisan test` failed in a fresh clone: `Test directory "/app/tests/Unit" not found`. Git does not track empty folders. | A timed run of the committed code from a fresh clone. | `tests/Unit/.gitkeep` committed (`55874ba`). |
 
-Smaller points: a lint warning about setting state inside an effect (fixed); a blank product image in an early screenshot was lazy loading, not a bug; and during the enquiry form check the browser tool's typing left the textarea empty in the backend's view. That was judged a tool artifact, because the same flow worked when the value was set the standard way and the component tests (which type with `userEvent`) pass. A change to functional state updates was made as hardening and is **not** claimed to be a fix.
+Smaller points: a lint warning about setting state inside an effect (fixed); a blank product image in an early screenshot was lazy loading, not a bug; and during the enquiry form check the browser tool's typing left the textarea empty in the backend's view. The agent's explanation is that this was a tool artifact, because the same flow worked when the value was set the standard way and the component tests (which type with `userEvent`) pass. That explanation is a judgement, not a proven cause. A change to functional state updates was made as hardening and is **not** claimed to be a fix.
 
 **How much independence the reviews have.** The code and the reviewing sub-agents are from the same model family, so the reviews are not an independent second opinion. They did find real problems (rows above) and also raised false alarms, for example claiming the Mailpit check was unverified when the agent had run it. The agent checked each finding against the code before acting on it.
 
@@ -50,8 +50,8 @@ Smaller points: a lint warning about setting state inside an effect (fixed); a b
 
 Last full run, in a **fresh clone of the committed branch** (not the working copy), on 25 Nov:
 
-- Backend: `php artisan test` — 56 passed (204 assertions).
-- Frontend: `vitest` — 36 passed in 5 files. `tsc -b` clean. `oxlint` 0 warnings, 0 errors. `npm run build` succeeded.
+- Backend: `php artisan test` — 56 passed (204 assertions). The runner counts each row of a data set as a test, so this is higher than the number of test methods.
+- Frontend: `vitest` — 36 passed in 5 files (the runner counts each `it.each` case). `tsc -b` clean. `oxlint` 0 warnings, 0 errors. `npm run build` succeeded.
 - `docker compose up` from that clone reached a working app in 35 seconds with Docker's base images already cached on this machine. A first-time image download is not included in that figure and was not measured.
 - A real enquiry sent through that stack arrived in Mailpit addressed to the sales inbox.
 
@@ -59,7 +59,7 @@ Not verified: browsers other than the one built into Cursor; automated end-to-en
 
 ## Actual time spent
 
-Confirmed by the developer. Each figure is approximate: the developer picked the closest of several ranges, and for planning, building, testing and reviewing chose "about 30 minutes or less", "about 1 hour or less", "about 30 minutes" and "about 30 minutes". Taken at face value that is **about 2.5 hours, within the 2–3 hour time-box.**
+Confirmed by the developer. Each figure is approximate: the developer picked the closest of several ranges, and for planning, building, testing and reviewing chose "about 30 minutes or less", "about 1 hour or less", "about 30 minutes" and "about 30 minutes". If planning and building are taken at their upper bounds and testing and reviewing as stated, that adds up to **at most about 2.5 hours**, which is inside the 2–3 hour time-box. The phases may overlap (the agent's own test and review loops ran during building), and these figures have not been reconciled with the commit times below, so the developer should correct them if their own records differ.
 
 | Phase | Time |
 | --- | --- |
@@ -68,4 +68,4 @@ Confirmed by the developer. Each figure is approximate: the developer picked the
 | Testing (the developer's own checks, apart from the agent's test runs) | about 30 minutes |
 | Reviewing (generated code and docs) | about 30 minutes |
 
-For reference, the git history shows the scaffold commit at 21:29 on 24 Nov and the project commits from 22:58 on 24 Nov to 00:13 on 25 Nov. Commit times show when work was saved, not how long anyone worked.
+For reference, the git history shows the scaffold commit at 21:29 on 24 Nov and the project commits from 22:58 on 24 Nov to about 00:17 on 25 Nov (the last documentation commit). That is about 2 hours 48 minutes from the first commit and about 1 hour 19 minutes from the first project commit. Commit times show when work was saved, not how long anyone worked.

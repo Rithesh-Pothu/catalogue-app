@@ -1,6 +1,6 @@
 # Product catalogue
 
-A proof of concept for a product catalogue: visitors browse featured products and categories, search, open a product and send an enquiry to the sales inbox. It is built as a foundation to grow, not a throwaway: the product source and the email provider can each be replaced without touching the rest.
+A proof of concept for a product catalogue: visitors browse featured products and categories, search, open a product and send an enquiry to the sales inbox. It is built as a foundation to grow, not a throwaway: the product source and the email provider each sit behind an interface, so replacing one means adding a class and changing one binding.
 
 Challenge brief: `docs/CHALLENGE.pdf` (not committed). Decisions and assumptions: [`DECISIONS.md`](DECISIONS.md). AI usage notes: [`AI_USAGE.md`](AI_USAGE.md).
 
@@ -76,12 +76,15 @@ React app  ──/api──▶  Laravel backend ──▶ ProductSource  ──�
 
 | Route | Purpose |
 | --- | --- |
+| `GET /api/health` | `{"status":"ok"}`, used by Docker's health check |
 | `GET /api/featured-products` | The featured products, without ratings |
 | `GET /api/categories` | Category names |
 | `GET /api/categories/{category}/products` | Featured products first, then the rest in source order |
 | `GET /api/search?q=` | Products whose title or description contains the term, ignoring case |
-| `GET /api/products/{id}` | One product |
-| `POST /api/products/{id}/enquiries` | Emails the sales inbox; `422` with field errors if invalid, `502` if the email could not be sent |
+| `GET /api/products/{id}` | One product; `404` if there is none (ids are 1 to 9 digits, anything else is a `404`) |
+| `POST /api/products/{id}/enquiries` | Emails the sales inbox and returns `201`; `422` with field errors if invalid, `404` for an unknown product, `502` if the email could not be sent |
+
+Any route that reads products returns `503` with "Products are unavailable right now." when the product source cannot be read; unknown categories return `404`.
 
 Where to look: `backend/app/Catalogue` (products and rules), `backend/app/Enquiries` (enquiries and mail), `backend/tests/Feature` (tests), `frontend/src/api/client.ts` (the only place that talks to the backend), `frontend/src/pages` and `frontend/src/components` (the UI). Domain terms are defined in [`GLOSSARY.md`](GLOSSARY.md).
 
