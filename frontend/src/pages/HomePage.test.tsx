@@ -1,7 +1,7 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import App from '../App'
 import { productFixture, stubBackend } from '../test-backend'
 
@@ -14,6 +14,29 @@ function renderHome() {
 }
 
 describe('Home page', () => {
+  it('covers the page with a loader until the products arrive', async () => {
+    let reply!: () => void
+    vi.stubGlobal(
+      'fetch',
+      (url: string) =>
+        new Promise<Response>((resolve) => {
+          const body = url === '/api/categories' ? { data: [] } : { data: [productFixture({ title: 'Gold Bracelet' })] }
+          const respond = () =>
+            resolve(new Response(JSON.stringify(body), { status: 200, headers: { 'Content-Type': 'application/json' } }))
+          if (url === '/api/featured-products') reply = respond
+          else respond()
+        }),
+    )
+
+    renderHome()
+
+    expect(screen.getByRole('status', { name: 'Loading products' })).toBeInTheDocument()
+
+    reply()
+    expect(await screen.findByRole('heading', { name: 'Gold Bracelet' })).toBeInTheDocument()
+    expect(screen.queryByRole('status', { name: 'Loading products' })).not.toBeInTheDocument()
+  })
+
   it('shows the featured products', async () => {
     stubBackend({
       '/api/featured-products': {

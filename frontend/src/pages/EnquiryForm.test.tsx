@@ -43,7 +43,7 @@ describe('Enquiry form', () => {
     expect(screen.getByLabelText('Message')).toBeInTheDocument()
   })
 
-  it('sends the enquiry to our backend and says thank you', async () => {
+  it('sends the enquiry to our backend and says thank you in a toast', async () => {
     const fetchMock = stubBackend({
       ...pageReplies,
       '/api/products/3/enquiries': { status: 201, body: { message: 'Thank you for your enquiry.' } },
@@ -53,11 +53,26 @@ describe('Enquiry form', () => {
     await fillIn(user, valid)
     await user.click(screen.getByRole('button', { name: 'Send enquiry' }))
 
-    expect(await screen.findByText('Thank you for your enquiry.')).toBeInTheDocument()
-    expect(screen.queryByLabelText('Name')).not.toBeInTheDocument()
+    expect(await screen.findByRole('status')).toHaveTextContent('Thank you for your enquiry.')
+    expect(screen.getByLabelText('Name')).toHaveValue('')
     const [, init] = fetchMock.mock.calls.find(([url]) => url === '/api/products/3/enquiries')!
     expect(init?.method).toBe('POST')
     expect(JSON.parse(init?.body as string)).toEqual(valid)
+  })
+
+  it('lets the visitor dismiss the toast', async () => {
+    stubBackend({
+      ...pageReplies,
+      '/api/products/3/enquiries': { status: 201, body: { message: 'Thank you for your enquiry.' } },
+    })
+    const user = await openEnquiryForm()
+    await fillIn(user, valid)
+    await user.click(screen.getByRole('button', { name: 'Send enquiry' }))
+    await screen.findByRole('status')
+
+    await user.click(screen.getByRole('button', { name: 'Dismiss' }))
+
+    expect(screen.queryByRole('status')).not.toBeInTheDocument()
   })
 
   it('shows sending progress and blocks a second submit while waiting', async () => {

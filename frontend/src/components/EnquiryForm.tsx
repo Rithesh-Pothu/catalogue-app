@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import {
   EnquiryNotSent,
   EnquiryRejected,
@@ -8,7 +8,9 @@ import {
   type Product,
 } from '../api/client'
 
-type Status = 'editing' | 'sending' | 'sent'
+type Status = 'editing' | 'sending'
+
+const TOAST_MILLISECONDS = 6000
 
 const fields: { name: keyof EnquiryInput; label: string }[] = [
   { name: 'name', label: 'Name' },
@@ -21,6 +23,13 @@ export default function EnquiryForm({ product }: { product: Product }) {
   const [status, setStatus] = useState<Status>('editing')
   const [fieldErrors, setFieldErrors] = useState<EnquiryErrors>({})
   const [failure, setFailure] = useState<string | null>(null)
+  const [thanked, setThanked] = useState(false)
+
+  useEffect(() => {
+    if (!thanked) return
+    const timer = setTimeout(() => setThanked(false), TOAST_MILLISECONDS)
+    return () => clearTimeout(timer)
+  }, [thanked])
 
   async function submit(event: FormEvent) {
     event.preventDefault()
@@ -32,7 +41,9 @@ export default function EnquiryForm({ product }: { product: Product }) {
     setFailure(null)
     try {
       await sendEnquiry(product.id, values)
-      setStatus('sent')
+      setValues({ name: '', email: '', message: '' })
+      setStatus('editing')
+      setThanked(true)
     } catch (error) {
       setStatus('editing')
       if (error instanceof EnquiryRejected) {
@@ -43,46 +54,52 @@ export default function EnquiryForm({ product }: { product: Product }) {
     }
   }
 
-  if (status === 'sent') {
-    return <p role="status">Thank you for your enquiry.</p>
-  }
-
   return (
-    <form className="enquiry" aria-label={`Enquire about ${product.title}`} onSubmit={submit} noValidate>
-      {fields.map(({ name, label }) => {
-        const messages = fieldErrors[name]
-        const errorId = `enquiry-${name}-error`
-        const props = {
-          id: `enquiry-${name}`,
-          name,
-          value: values[name],
-          onChange: (event: { target: { value: string } }) => {
-            const { value } = event.target
-            setValues((current) => ({ ...current, [name]: value }))
-          },
-          'aria-invalid': messages ? true : undefined,
-          'aria-describedby': messages ? errorId : undefined,
-        }
-        return (
-          <div key={name} className="field">
-            <label htmlFor={props.id}>{label}</label>
-            {name === 'message' ? (
-              <textarea rows={5} {...props} />
-            ) : (
-              <input type={name === 'email' ? 'email' : 'text'} {...props} />
-            )}
-            {messages && (
-              <p id={errorId} className="field-error">
-                {messages.join(' ')}
-              </p>
-            )}
-          </div>
-        )
-      })}
-      {failure && <p role="alert">{failure}</p>}
-      <button type="submit" disabled={status === 'sending'}>
-        {status === 'sending' ? 'Sending…' : 'Send enquiry'}
-      </button>
-    </form>
+    <>
+      <form className="enquiry" aria-label={`Enquire about ${product.title}`} onSubmit={submit} noValidate>
+        {fields.map(({ name, label }) => {
+          const messages = fieldErrors[name]
+          const errorId = `enquiry-${name}-error`
+          const props = {
+            id: `enquiry-${name}`,
+            name,
+            value: values[name],
+            onChange: (event: { target: { value: string } }) => {
+              const { value } = event.target
+              setValues((current) => ({ ...current, [name]: value }))
+            },
+            'aria-invalid': messages ? true : undefined,
+            'aria-describedby': messages ? errorId : undefined,
+          }
+          return (
+            <div key={name} className="field">
+              <label htmlFor={props.id}>{label}</label>
+              {name === 'message' ? (
+                <textarea rows={5} {...props} />
+              ) : (
+                <input type={name === 'email' ? 'email' : 'text'} {...props} />
+              )}
+              {messages && (
+                <p id={errorId} className="field-error">
+                  {messages.join(' ')}
+                </p>
+              )}
+            </div>
+          )
+        })}
+        {failure && <p role="alert">{failure}</p>}
+        <button type="submit" disabled={status === 'sending'}>
+          {status === 'sending' ? 'Sending…' : 'Send enquiry'}
+        </button>
+      </form>
+      {thanked && (
+        <div role="status" className="toast">
+          <span>Thank you for your enquiry.</span>
+          <button type="button" aria-label="Dismiss" onClick={() => setThanked(false)}>
+            ×
+          </button>
+        </div>
+      )}
+    </>
   )
 }

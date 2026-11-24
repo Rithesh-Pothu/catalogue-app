@@ -2,6 +2,7 @@ import { useOutletContext } from 'react-router-dom'
 import { getFeaturedProducts } from '../api/client'
 import CategoryLinks from '../components/CategoryLinks'
 import type { LayoutContext } from '../components/Layout'
+import Loading from '../components/Loading'
 import ProductTile from '../components/ProductTile'
 import Unavailable from '../components/Unavailable'
 import { useLoad } from '../useLoad'
@@ -16,7 +17,7 @@ export default function HomePage() {
   }
 
   if (featured.status === 'loading') {
-    return <p>Loading…</p>
+    return <Loading />
   }
   if (featured.status !== 'ready') {
     return <Unavailable onRetry={retry} />

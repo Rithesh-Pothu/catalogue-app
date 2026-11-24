@@ -2,6 +2,7 @@ import { useCallback } from 'react'
 import { useLocation, useSearchParams } from 'react-router-dom'
 import { searchProducts } from '../api/client'
 import ProductTile from '../components/ProductTile'
+import Loading from '../components/Loading'
 import Unavailable from '../components/Unavailable'
 import { useLoad } from '../useLoad'
 
@@ -10,7 +11,7 @@ function Results({ term }: { term: string }) {
   const [results, reload] = useLoad(fetchResults)
 
   if (results.status === 'loading') {
-    return <p role="status">Loading…</p>
+    return <Loading />
   }
   if (results.status !== 'ready') {
     return <Unavailable onRetry={reload} />

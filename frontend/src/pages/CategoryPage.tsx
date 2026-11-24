@@ -1,6 +1,7 @@
 import { useCallback } from 'react'
 import { useParams } from 'react-router-dom'
 import { getCategoryProducts } from '../api/client'
+import Loading from '../components/Loading'
 import NotFound from '../components/NotFound'
 import ProductTile from '../components/ProductTile'
 import Unavailable from '../components/Unavailable'
@@ -11,7 +12,7 @@ function CategoryProducts({ name }: { name: string }) {
   const [products, reload] = useLoad(fetchProducts)
 
   if (products.status === 'loading') {
-    return <p>Loading…</p>
+    return <Loading />
   }
   if (products.status === 'not-found') {
     return <NotFound message="We couldn't find that category." />

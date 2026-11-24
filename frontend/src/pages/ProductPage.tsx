@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getProduct } from '../api/client'
 import EnquiryForm from '../components/EnquiryForm'
+import Loading from '../components/Loading'
 import NotFound from '../components/NotFound'
 import Unavailable from '../components/Unavailable'
 import { categoryPath, formatPrice } from '../format'
@@ -13,7 +14,7 @@ function ProductDetails({ id }: { id: string }) {
   const [enquiring, setEnquiring] = useState(false)
 
   if (product.status === 'loading') {
-    return <p>Loading…</p>
+    return <Loading />
   }
   if (product.status === 'not-found') {
     return <NotFound message="We couldn't find that product." />
