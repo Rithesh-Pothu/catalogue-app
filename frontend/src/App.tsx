@@ -1,22 +1,14 @@
-import { useEffect, useState } from 'react'
-import { getHealth } from './api/client'
-
-type BackendState = 'checking' | 'ok' | 'unreachable'
+import { Route, Routes } from 'react-router-dom'
+import Layout from './components/Layout'
+import HomePage from './pages/HomePage'
 
 function App() {
-  const [backend, setBackend] = useState<BackendState>('checking')
-
-  useEffect(() => {
-    getHealth()
-      .then((health) => setBackend(health.status === 'ok' ? 'ok' : 'unreachable'))
-      .catch(() => setBackend('unreachable'))
-  }, [])
-
   return (
-    <main>
-      <h1>Product catalogue</h1>
-      <p>Backend: {backend}</p>
-    </main>
+    <Routes>
+      <Route element={<Layout />}>
+        <Route index element={<HomePage />} />
+      </Route>
+    </Routes>
   )
 }
 

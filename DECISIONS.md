@@ -15,6 +15,9 @@ Architecture decisions are in `docs/adr/`. Domain terms are in `GLOSSARY.md`.
 - Price is shown in US dollars. There is no cart or checkout.
 - Unknown products and categories show a not-found page. If the product source is down, the page says products are unavailable and offers a retry.
 - Product data is cached for five minutes. Failures are not cached.
+- Product images are loaded by the browser straight from the image address the source gives us (Fake Store's image host). The product data itself goes only through our backend, but the image bytes do not. This is a known gap against "all product data must go through your backend" and ADR 0001. The alternative is an image route on our backend that fetches and returns the image; it is not built yet.
+- The featured product ids default to `3,5,11,12,18` (one or more from each Fake Store category) and are set with `FEATURED_PRODUCT_IDS`.
+- Fake Store spells one category "jewelery". We show the source's own spelling.
 
 ## Dropped or simplified
 
@@ -27,7 +30,7 @@ Architecture decisions are in `docs/adr/`. Domain terms are in `GLOSSARY.md`.
 - The product source and the email provider are each behind an interface (ADR 0001, ADR 0002).
 - The frontend only knows our own product shape: `id`, `title`, `price`, `description`, `category`, `image` and an optional `rating`. Source field names never reach the browser.
 - Backend modules:
-  - **Catalogue** (`featured`, `inCategory`, `search`, `product`, `categories`) holds the featured list, ordering, search, rating hiding, not-found and unavailable outcomes, and the cache. It reads products through the product source, which has `all()` and `find(id)`.
+  - **Catalogue** (`featured`, `inCategory`, `search`, `product`, `categories`) holds the featured list, ordering, search, rating hiding, not-found and unavailable outcomes, and the cache. It reads products through the product source, which has a single method, `all()`. A `find(id)` was planned but dropped: the source has about twenty products and nothing needs a single-product lookup that `all()` cannot answer, so the smaller interface wins.
   - **Enquiries** (`submit`) holds validation and email composition. It gets the product from Catalogue and sends through the mail provider (`send`).
   - Controllers only translate requests and responses.
 - The five featured product ids live in Laravel config, not in code.
